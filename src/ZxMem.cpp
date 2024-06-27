@@ -77,7 +77,7 @@ namespace ZQF
             auto tmp = std::make_unique_for_overwrite<uint8_t[]>(nNewSizeBytes);
             if (isDiscard == false)
             {
-                ::memcpy(tmp.get(), m_upMemData.get(), m_nSizeBytes);
+                std::memcpy(tmp.get(), m_upMemData.get(), m_nSizeBytes);
             }
             m_upMemData = std::move(tmp);
         }

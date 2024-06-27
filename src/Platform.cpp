@@ -121,7 +121,7 @@ namespace ZQF
         if ((pos == std::string_view::npos) || (pos == 1)) { return; }
 
         auto path_buffer = std::make_unique_for_overwrite<char[]>(msPath.size());
-        memcpy(path_buffer.get(), msPath.data(), msPath.size());
+        std::memcpy(path_buffer.get(), msPath.data(), msPath.size());
 
         path_buffer.get()[pos + 1] = {}; // rm file_name
 
