@@ -7,8 +7,7 @@
 namespace ZQF
 {
 #ifdef _WIN32
-#include <windef.h>
-    using FILE_HANLDE_TYPE = HADNLE;
+    using FILE_HANLDE_TYPE = void*;
 #elif __linux__
     using FILE_HANLDE_TYPE = int;
 #endif
