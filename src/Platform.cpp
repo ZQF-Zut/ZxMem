@@ -66,7 +66,9 @@ namespace ZQF
 
     auto FileGetSize(FILE_HANLDE_TYPE hFile) -> size_t
     {
-        return static_cast<size_t>(::GetFileSize(hFile, nullptr));
+        LARGE_INTEGER file_size_large{};
+        (void)::GetFileSizeEx(hFile, &file_size_large);
+        return static_cast<size_t>(file_size_large.QuadPart);
     }
 
     auto FileClose(FILE_HANLDE_TYPE hFile) -> void
