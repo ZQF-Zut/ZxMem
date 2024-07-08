@@ -14,7 +14,7 @@ static auto TestZxMemIO() -> void
         mem.Write(std::span{ ee });
         [[maybe_unused]] int a = 0;
 
-        mem.PosSet<ZQF::ZxMem::PosWay::Cur>(-4);
+        mem.PosSet<ZQF::ZxMem::PosWay::Cur>(static_cast<size_t>(-4));
 
         [[maybe_unused]] uint16_t x0 = mem.Get<uint16_t>();
         [[maybe_unused]] uint16_t x1 = mem.Get<uint16_t>();
