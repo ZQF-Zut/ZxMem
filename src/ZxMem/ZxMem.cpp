@@ -110,7 +110,7 @@ namespace ZQF
         if (!file_size) { throw std::runtime_error(std::format("ZxMem::Load(): get file size error!, msPath: {}", msPath)); }
 
         size_t read_size_bytes{};
-        if (nReadSize == ZXMEM_AUTO_READ_SIZE)
+        if (nReadSize == 0)
         {
             read_size_bytes = file_size;
         }

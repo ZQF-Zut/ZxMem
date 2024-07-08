@@ -9,8 +9,6 @@
 
 namespace ZQF
 {
-    constexpr size_t ZXMEM_AUTO_READ_SIZE = -1;
-
     class ZxMem
     {
     private:
@@ -31,7 +29,7 @@ namespace ZQF
         ZxMem(size_t nSize);
         ZxMem(const ZxMem& rfOBJ);
         ZxMem(ZxMem&& rfOBJ) noexcept;
-        ZxMem(const std::string_view msPath, size_t nReadSize = ZXMEM_AUTO_READ_SIZE);
+        ZxMem(const std::string_view msPath, size_t nReadSize = 0);
         auto operator=(const ZxMem& rfOBJ)->ZxMem&;
         auto operator=(ZxMem&& rfOBJ) noexcept -> ZxMem&;
 
@@ -80,7 +78,7 @@ namespace ZQF
 
     public:
         auto Save(const std::string_view msPath, bool isCoverExists = true, bool isCreateDirectories = true) const -> const ZxMem&;
-        auto Load(const std::string_view msPath, size_t nReadSize = ZXMEM_AUTO_READ_SIZE) -> ZxMem&;
+        auto Load(const std::string_view msPath, size_t nReadSize = 0) -> ZxMem&;
     };
 
     template <class T>

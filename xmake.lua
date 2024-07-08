@@ -3,7 +3,7 @@ set_project("zxmem")
 set_xmakever("2.8.9")
 
 -- language
-set_warnings("all")
+set_warnings("allextra")
 set_languages("c++23")
 set_encodings("utf-8")
 
@@ -30,8 +30,8 @@ target("zxmem")
         end
     end
     add_files("src/**.cpp")
-    add_includedirs("include", {public = true})
-    add_headerfiles("include/(**.h)")
+    add_includedirs("src", {public = true})
+    add_headerfiles("src/(**.h)")
 
 target("zxmem-test")
     set_default(false)
