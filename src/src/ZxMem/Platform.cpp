@@ -1,6 +1,6 @@
 #include <ZxMem/Platform.h>
 #include <span>
-#include <format>
+#include <memory>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -13,19 +13,19 @@
 #endif
 
 
-namespace ZQF
+namespace ZQF::ZxMemPrivate
 {
 #ifdef _WIN32
     static auto PathUtf8ToWide(const std::string_view msPath) -> std::pair<std::wstring_view, std::unique_ptr<wchar_t[]>>
     {
-        const auto char_count = static_cast<size_t>(::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, msPath.data(), static_cast<int>(msPath.size()), nullptr, 0));
-        auto buffer = std::make_unique_for_overwrite<wchar_t[]>(char_count + 1);
-        const auto char_count_real = static_cast<size_t>(::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, msPath.data(), static_cast<int>(msPath.size()), buffer.get(), static_cast<int>(char_count)));
+        const std::size_t buffer_max_chars = (msPath.size() * sizeof(char) + 1) * 2;
+        auto buffer = std::make_unique_for_overwrite<wchar_t[]>(buffer_max_chars);
+        const auto char_count_real = static_cast<std::size_t>(::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, msPath.data(), static_cast<int>(msPath.size()), buffer.get(), static_cast<int>(buffer_max_chars)));
         buffer[char_count_real] = {};
-        return { { buffer.get(), char_count }, std::move(buffer) };
+        return { std::wstring_view{ buffer.get(), char_count_real }, std::move(buffer) };
     }
 
-    static auto CreateDirectories(std::pair<std::wstring_view, std::unique_ptr<wchar_t[]>>& rfWidePath) -> void
+    static auto CreateDirectories(const std::pair<std::wstring_view, std::unique_ptr<wchar_t[]>>& rfWidePath) -> void
     {
         auto& [path_wide_sv, path_wide_buffer] = rfWidePath;
 
@@ -57,64 +57,69 @@ namespace ZQF
         path_wide_buffer.get()[pos + 1] = file_name_mask_char_tmp;
     }
 
-    auto FileOpenViaReadMode(const std::string_view msPath) -> FILE_HANLDE_TYPE
+    auto FileOpenViaReadMode(const std::string_view msPath) -> std::optional<FILE_HANLDE_TYPE>
     {
-        const HANDLE hfile = ::CreateFileW(PathUtf8ToWide(msPath).second.get(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (hfile == INVALID_HANDLE_VALUE) { throw std::runtime_error(std::format("ZxMem::RreadAllBytes(): open file error!. msPath: {}", msPath)); }
-        return hfile;
+        const auto hfile = ::CreateFileW(PathUtf8ToWide(msPath).second.get(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        return (hfile == INVALID_HANDLE_VALUE) ? std::nullopt : std::optional{ hfile };
     }
 
-    auto FileGetSize(FILE_HANLDE_TYPE hFile) -> size_t
+    auto FileGetSize(FILE_HANLDE_TYPE hFile) -> std::optional<std::uint64_t>
     {
         LARGE_INTEGER file_size_large{};
-        (void)::GetFileSizeEx(hFile, &file_size_large);
-        return static_cast<size_t>(file_size_large.QuadPart);
+        const auto status = ::GetFileSizeEx(hFile, &file_size_large);
+        return status != FALSE ? std::optional{ static_cast<std::size_t>(file_size_large.QuadPart) } : std::nullopt;
     }
 
-    auto FileClose(FILE_HANLDE_TYPE hFile) -> void
+    auto FileClose(FILE_HANLDE_TYPE hFile) -> bool
     {
-        ::CloseHandle(hFile);
+        const auto status = ::CloseHandle(hFile);
+        return status != FALSE ? true : false;
     }
 
-    auto FileRead(FILE_HANLDE_TYPE hFile, const std::span<uint8_t> spData) -> void
+    auto FileRead(FILE_HANLDE_TYPE hFile, const std::span<std::uint8_t> spBuffer) -> std::optional<std::size_t>
     {
-        DWORD read{};
-        (void)::ReadFile(hFile, spData.data(), static_cast<DWORD>(spData.size_bytes()), &read, nullptr);
+        DWORD read_bytes{};
+        const auto status = ::ReadFile(hFile, spBuffer.data(), static_cast<DWORD>(spBuffer.size_bytes()), &read_bytes, nullptr);
+        return status != FALSE ? std::optional{ static_cast<std::size_t>(read_bytes) } : std::nullopt;
     }
 
-    auto StoreBytesViaPath(const std::string_view msPath, const std::span<uint8_t> spData, bool isCoverExists, bool isCreateDirectories) -> void
+    auto SaveDataViaPathImp(const std::string_view msPath, const std::span<const std::uint8_t> spData, const bool isCoverExists, const bool isCreateDirectories) -> bool
     {
         auto wide_path = PathUtf8ToWide(msPath);
-        if (isCreateDirectories) { CreateDirectories(wide_path); }
-        const HANDLE hfile = ::CreateFileW(wide_path.first.data(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, isCoverExists ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (hfile == INVALID_HANDLE_VALUE) { throw std::runtime_error(std::format("ZxMem::WriteAllBytes(): create file error!. msPath: {}", msPath)); }
+        if (isCreateDirectories) { ZxMemPrivate::CreateDirectories(wide_path); }
+        const auto hfile = ::CreateFileW(wide_path.first.data(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, isCoverExists ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hfile == INVALID_HANDLE_VALUE) { return false; }
         DWORD write{};
-        (void)::WriteFile(hfile, spData.data(), static_cast<DWORD>(spData.size_bytes()), &write, nullptr);
-        ::CloseHandle(hfile);
+        const auto staus = ::WriteFile(hfile, spData.data(), static_cast<DWORD>(spData.size_bytes()), &write, nullptr);
+        if (staus == FALSE)
+        {
+            (void)::CloseHandle(hfile);
+            return false;
+        }
+        return ::CloseHandle(hfile) != FALSE;
     }
 #else
-    auto FileOpenViaReadMode(const std::string_view msPath) -> FILE_HANLDE_TYPE
+    auto FileOpenViaReadMode(const std::string_view msPath) -> std::optional<FILE_HANLDE_TYPE>
     {
         const auto file_handle = ::open(msPath.data(), O_RDONLY, 0666);
-        if (file_handle == -1) { throw std::runtime_error(std::format("ZxMem::RreadAllBytes(): open file error!. msPath: {}", msPath)); }
-        return file_handle;
+        return (file_handle == -1) ? std::nullopt : std::optional{ file_handle };
     }
 
-    auto FileGetSize(FILE_HANLDE_TYPE hFile) -> size_t
+    auto FileGetSize(const FILE_HANLDE_TYPE hFile) -> std::optional<std::uint64_t>
     {
-        const auto file_size = ::lseek(hFile, 0, SEEK_END);
-        ::lseek(hFile, 0, SEEK_SET);
-        return static_cast<size_t>(file_size);
+        struct ::stat s;
+        return (::fstat(hFile, &s) == -1) ? std::nullopt : std::optional{ static_cast<std::uint64_t>(s.st_size) };
     }
 
-    auto FileClose(FILE_HANLDE_TYPE hFile) -> void
+    auto FileClose(const FILE_HANLDE_TYPE hFile) -> bool
     {
-        ::close(hFile);
+        return (::close(hFile) == -1) ? false : true;
     }
 
-    auto FileRead(FILE_HANLDE_TYPE hFile, const std::span<uint8_t> spData) -> void
+    auto FileRead(const FILE_HANLDE_TYPE hFile, const std::span<std::uint8_t> spBuffer) -> std::optional<std::size_t>
     {
-        ::read(hFile, spData.data(), spData.size_bytes());
+        const auto read_bytes = ::read(hFile, spBuffer.data(), spBuffer.size_bytes());
+        return (read_bytes == -1) ? std::nullopt : std::optional{ static_cast<std::size_t>(read_bytes) };
     }
 
     static auto CreateDirectories(const std::string_view msPath) -> void
@@ -147,15 +152,16 @@ namespace ZQF
         }
     }
 
-    auto StoreBytesViaPath(const std::string_view msPath, const std::span<uint8_t> spData, bool isCoverExists, bool isCreateDirectories) -> void
+    auto SaveDataViaPathImp(const std::string_view msPath, const std::span<const std::uint8_t> spData, const bool isCoverExists, const bool isCreateDirectories) -> bool
     {
-        if (isCreateDirectories) { ZQF::CreateDirectories(msPath); }
+        if (isCreateDirectories) { ZxMemPrivate::CreateDirectories(msPath); }
         constexpr auto create_always = O_CREAT | O_WRONLY | O_TRUNC;
         constexpr auto create_new = O_CREAT | O_WRONLY | O_EXCL;
         const auto file_handle = ::open(msPath.data(), isCoverExists ? create_always : create_new, 0666);  // NOLINT
-        if (file_handle == -1) { throw std::runtime_error(std::format("ZxMem::WriteAllBytes(): create file failed!", msPath)); }
-        ::write(file_handle, spData.data(), spData.size_bytes());
-        ::close(file_handle);
+        if (file_handle == -1) { return false; }
+        const auto written_bytes = ::write(file_handle, spData.data(), spData.size_bytes());
+        if (written_bytes == -1) { ::close(file_handle); return false; }
+        return (::close(file_handle) == -1) ? false : true;
     }
 #endif
-} // namespace ZQF::ZxMem
+} // namespace ZQF::ZxMemPrivate

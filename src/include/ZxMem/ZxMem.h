@@ -12,9 +12,9 @@ namespace ZQF
     class ZxMem
     {
     private:
-        size_t m_nPos{};
-        size_t m_nSizeBytes{};
-        std::unique_ptr<uint8_t[]> m_upMemData;
+        std::size_t m_nPos{};
+        std::size_t m_nSizeBytes{};
+        std::unique_ptr<std::uint8_t[]> m_upMemData;
     public:
         enum class PosWay
         {
@@ -26,42 +26,42 @@ namespace ZQF
     public:
         ZxMem();
         ~ZxMem();
-        ZxMem(size_t nSize);
+        ZxMem(const std::size_t nSize);
         ZxMem(const ZxMem& rfOBJ);
         ZxMem(ZxMem&& rfOBJ) noexcept;
-        ZxMem(const std::string_view msPath, size_t nReadSize = 0);
+        ZxMem(const std::string_view msPath, std::size_t nReadSize = static_cast<size_t>(-1));
         auto operator=(const ZxMem& rfOBJ)->ZxMem&;
         auto operator=(ZxMem&& rfOBJ) noexcept -> ZxMem&;
 
     public:
-        auto Resize(size_t nNewSizeBytes, bool isDiscard = false) -> ZxMem&;
+        auto Resize(const std::size_t nNewSizeBytes, const bool isDiscard = false) -> ZxMem&;
 
-        template <class T = size_t>
+        template <class T = std::size_t>
         auto SizeBytes() const noexcept -> T;
 
-        template <class T = uint8_t*>
+        template <class T = std::uint8_t*>
         auto Ptr() const noexcept -> T;
 
-        template <class T = uint8_t*>
+        template <class T = std::uint8_t*>
         auto PtrCur() const noexcept -> T;
 
-        template <class T = uint8_t>
+        template <class T = std::uint8_t>
         auto Span() const noexcept -> std::span<T>;
 
         template <class T = size_t>
         auto Pos() const->T;
 
         template <ZxMem::PosWay eWay = ZxMem::PosWay::Beg>
-        auto PosSet(size_t nBytes = 0) -> ZxMem&;
+        auto PosSet(const std::size_t nBytes = 0) -> ZxMem&;
 
-        auto PosInc(size_t nBytes) -> ZxMem&;
+        auto PosInc(const std::size_t nBytes) -> ZxMem&;
         auto PosRewind() -> ZxMem&;
 
     public:
-        template <class T, size_t S>
+        template <class T, std::size_t S>
         auto Read(const std::span<T, S> spData) -> void;
 
-        template <class T, size_t S>
+        template <class T, std::size_t S>
         auto Write(const std::span<T, S> spData) -> void;
 
         template<class T>
@@ -77,8 +77,8 @@ namespace ZQF
         auto Put(const T& rfData) -> ZxMem&;
 
     public:
-        auto Save(const std::string_view msPath, bool isCoverExists = true, bool isCreateDirectories = true) const -> const ZxMem&;
-        auto Load(const std::string_view msPath, size_t nReadSize = 0) -> ZxMem&;
+        auto Save(const std::string_view msPath, const bool isCoverExists = true, const bool isCreateDirectories = true) const -> const ZxMem&;
+        auto Load(const std::string_view msPath, const std::size_t nReadSize = static_cast<size_t>(-1)) -> ZxMem&;
     };
 
     template <class T>
@@ -104,7 +104,7 @@ namespace ZQF
         }
         else
         {
-            static_assert(false, "ZxMem::CurPtr<T>(): not pointer type!");
+            static_assert(false, "ZxMem::PtrCur<T>(): not pointer type!");
         }
     }
 
@@ -128,7 +128,7 @@ namespace ZQF
     }
 
     template <ZxMem::PosWay eWay>
-    inline auto ZxMem::PosSet(size_t nBytes) -> ZxMem&
+    inline auto ZxMem::PosSet(const std::size_t nBytes) -> ZxMem&
     {
         if constexpr (eWay == ZxMem::PosWay::Beg)
         {
@@ -146,7 +146,7 @@ namespace ZQF
 
         if (m_nPos > m_nSizeBytes)
         {
-            throw std::runtime_error("ZxMem::SetPos: out of size!");
+            throw std::runtime_error("ZxMem::PosSet<T>(): out of size!");
         }
 
         return *this;
@@ -165,19 +165,19 @@ namespace ZQF
         }
     }
 
-    template <class T, size_t S>
+    template <class T, std::size_t S>
     inline auto ZxMem::Read(const std::span<T, S> spData) -> void
     {
         if (spData.empty()) { return; }
-        std::memcpy(spData.data(), this->PtrCur<uint8_t*>(), spData.size_bytes());
+        std::memcpy(spData.data(), this->PtrCur<std::uint8_t*>(), spData.size_bytes());
         this->PosSet<ZxMem::PosWay::Cur>(spData.size_bytes());
     }
 
-    template <class T, size_t S>
+    template <class T, std::size_t S>
     inline auto ZxMem::Write(const std::span<T, S> spData) -> void
     {
         if (spData.empty()) { return; }
-        std::memcpy(this->PtrCur<uint8_t*>(), spData.data(), spData.size_bytes());
+        std::memcpy(this->PtrCur<std::uint8_t*>(), spData.data(), spData.size_bytes());
         this->PosSet<ZxMem::PosWay::Cur>(spData.size_bytes());
     }
 

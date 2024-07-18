@@ -65,13 +65,12 @@ auto main() -> int
 {
     try
     {
-        ZQF::ZxMem mem{ "/usr/bin/lua" };
-        mem.Save("./123.lua", true, true);
+        ZQF::ZxMem mem{ "1.data",3919873 };
+        mem.Save("my_data.bin", true, true);
         TestZxMemIO();
     }
     catch (const std::exception& err)
     {
         std::println(std::cerr, "std::exception: {}", err.what());
     }
-
 }

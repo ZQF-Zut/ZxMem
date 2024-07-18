@@ -1,8 +1,6 @@
 #include <ZxMem/ZxMem.h>
 #include <ZxMem/Platform.h>
 #include <format>
-#include <cstdio>
-#include <filesystem>
 
 
 namespace ZQF
@@ -17,7 +15,7 @@ namespace ZQF
 
     }
 
-    ZxMem::ZxMem(size_t nSize)
+    ZxMem::ZxMem(const std::size_t nSize)
     {
         this->Resize(nSize, true);
     }
@@ -32,7 +30,7 @@ namespace ZQF
         this->operator=(std::move(rfOBJ));
     }
 
-    ZxMem::ZxMem(const std::string_view msPath, size_t nReadSize)
+    ZxMem::ZxMem(const std::string_view msPath, const std::size_t nReadSize)
     {
         this->Load(msPath, nReadSize);
     }
@@ -45,7 +43,7 @@ namespace ZQF
         m_nSizeBytes = rfOBJ.m_nSizeBytes;
         if (rfOBJ.m_upMemData != nullptr)
         {
-            m_upMemData = std::make_unique_for_overwrite<uint8_t[]>(rfOBJ.m_nSizeBytes);
+            m_upMemData = std::make_unique_for_overwrite<std::uint8_t[]>(rfOBJ.m_nSizeBytes);
             std::memcpy(m_upMemData.get(), rfOBJ.m_upMemData.get(), m_nSizeBytes);
         }
 
@@ -66,7 +64,7 @@ namespace ZQF
         return *this;
     }
 
-    auto ZxMem::Resize(size_t nNewSizeBytes, bool isDiscard) -> ZxMem&
+    auto ZxMem::Resize(const std::size_t nNewSizeBytes, const bool isDiscard) -> ZxMem&
     {
         if (m_upMemData == nullptr)
         {
@@ -86,7 +84,7 @@ namespace ZQF
         return *this;
     }
 
-    auto ZxMem::PosInc(size_t nBytes) -> ZxMem&
+    auto ZxMem::PosInc(const std::size_t nBytes) -> ZxMem&
     {
         return this->PosSet<ZxMem::PosWay::Cur>(nBytes);
     }
@@ -96,35 +94,36 @@ namespace ZQF
         return this->PosSet<ZxMem::PosWay::Beg>(0);
     }
 
-    auto ZxMem::Save(const std::string_view msPath, bool isCoverExists, bool isCreateDirectories) const -> const ZxMem&
+    auto ZxMem::Save(const std::string_view msPath, const bool isCoverExists, const bool isCreateDirectories) const -> const ZxMem&
     {
-        ZQF::StoreBytesViaPath(msPath, this->Span(), isCoverExists, isCreateDirectories);
+        bool status = ZxMemPrivate::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories);
+        if (status == false) { throw std::runtime_error(std::format("ZxMem::Save(): save data error! -> msPath: {}", msPath)); }
         return *this;
     }
 
-    auto ZxMem::Load(const std::string_view msPath, size_t nReadSize) -> ZxMem&
+    auto ZxMem::Load(const std::string_view msPath, const std::size_t nReadSize) -> ZxMem&
     {
-        auto file_handle = ZQF::FileOpenViaReadMode(msPath);
-        size_t file_size = ZQF::FileGetSize(file_handle);
-
-        if (!file_size) { throw std::runtime_error(std::format("ZxMem::Load(): get file size error!, msPath: {}", msPath)); }
-
-        size_t read_size_bytes{};
-        if (nReadSize == 0)
+        if (const auto file_handle_opt = ZxMemPrivate::FileOpenViaReadMode(msPath))
         {
-            read_size_bytes = file_size;
-        }
-        else if (nReadSize <= file_size)
-        {
-            read_size_bytes = nReadSize;
-        }
-        else
-        {
-            throw std::runtime_error(std::format("ZxMem::Load(): read size larger than file size!, msPath: {}", msPath));
+            const auto file_handle = *file_handle_opt;
+            if (const auto file_size_opt = ZxMemPrivate::FileGetSize(file_handle))
+            {
+                const std::size_t file_size = static_cast<std::size_t>(*file_size_opt);
+                const std::size_t read_size_bytes = nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize;
+                this->Resize(read_size_bytes, true);
+                if (const auto read_bytes_opt = ZxMemPrivate::FileRead(file_handle, this->Span()))
+                {
+                    if (*read_bytes_opt == read_size_bytes)
+                    {
+                        ZxMemPrivate::FileClose(file_handle);
+                        return this->PosRewind();
+                    }
+                }
+            }
+
+            ZxMemPrivate::FileClose(file_handle);
         }
 
-        ZQF::FileRead(file_handle, this->Resize(read_size_bytes, true).Span());
-        ZQF::FileClose(file_handle);
-        return this->PosRewind();
+        throw std::runtime_error(std::format("ZxMem::Load(): error! -> msPath: {}", msPath));
     }
 }
