@@ -17,7 +17,7 @@ namespace ZQF
 
     ZxMem::ZxMem(const std::size_t nSize)
     {
-        this->Resize(nSize, true);
+        this->Resize(nSize, true, true);
     }
 
     ZxMem::ZxMem(const ZxMem& rfOBJ)
@@ -64,7 +64,7 @@ namespace ZQF
         return *this;
     }
 
-    auto ZxMem::Resize(const std::size_t nNewSizeBytes, const bool isDiscard) -> ZxMem&
+    auto ZxMem::Resize(const std::size_t nNewSizeBytes, const bool isDiscard , const bool isRewindPos) -> ZxMem&
     {
         if (m_upMemData == nullptr)
         {
@@ -78,6 +78,11 @@ namespace ZQF
                 std::memcpy(tmp.get(), m_upMemData.get(), m_nSizeBytes);
             }
             m_upMemData = std::move(tmp);
+        }
+
+        if (isRewindPos)
+        {
+            this->PosRewind();
         }
 
         m_nSizeBytes = nNewSizeBytes;
@@ -110,7 +115,7 @@ namespace ZQF
             {
                 const std::size_t file_size = static_cast<std::size_t>(*file_size_opt);
                 const std::size_t read_size_bytes = nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize;
-                this->Resize(read_size_bytes, true);
+                this->Resize(read_size_bytes, true, true);
                 if (const auto read_bytes_opt = ZxMemPrivate::FileRead(file_handle, this->Span()))
                 {
                     if (*read_bytes_opt == read_size_bytes)

@@ -34,7 +34,7 @@ namespace ZQF
         auto operator=(ZxMem&& rfOBJ) noexcept -> ZxMem&;
 
     public:
-        auto Resize(const std::size_t nNewSizeBytes, const bool isDiscard = false) -> ZxMem&;
+        auto Resize(const std::size_t nNewSizeBytes, const bool isDiscard = true, const bool isRewindPos = true) -> ZxMem&;
 
         template <class T = std::size_t>
         auto SizeBytes() const noexcept -> T;
