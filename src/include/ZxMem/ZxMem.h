@@ -14,6 +14,7 @@ namespace ZQF
     private:
         std::size_t m_nPos{};
         std::size_t m_nSizeBytes{};
+        std::size_t m_nMaxSizeBytes{};
         std::unique_ptr<std::uint8_t[]> m_upMemData;
     public:
         enum class PosWay

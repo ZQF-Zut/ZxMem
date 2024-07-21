@@ -65,8 +65,6 @@ auto main() -> int
 {
     try
     {
-        ZQF::ZxMem mem{ "1.data",3919873 };
-        mem.Save("my_data.bin", true, true);
         TestZxMemIO();
     }
     catch (const std::exception& err)

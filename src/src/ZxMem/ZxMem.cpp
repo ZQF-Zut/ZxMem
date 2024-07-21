@@ -69,8 +69,9 @@ namespace ZQF
         if (m_upMemData == nullptr)
         {
             m_upMemData = std::make_unique_for_overwrite<uint8_t[]>(nNewSizeBytes);
+            m_nMaxSizeBytes = nNewSizeBytes;
         }
-        else if (m_nSizeBytes < nNewSizeBytes)
+        else if (m_nMaxSizeBytes < nNewSizeBytes)
         {
             auto tmp = std::make_unique_for_overwrite<uint8_t[]>(nNewSizeBytes);
             if (isDiscard == false)
@@ -78,6 +79,7 @@ namespace ZQF
                 std::memcpy(tmp.get(), m_upMemData.get(), m_nSizeBytes);
             }
             m_upMemData = std::move(tmp);
+            m_nMaxSizeBytes = nNewSizeBytes;
         }
 
         if (isRewindPos)
