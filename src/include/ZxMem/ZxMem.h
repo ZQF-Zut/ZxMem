@@ -16,10 +16,11 @@ namespace ZQF
         std::size_t m_nSizeBytes{};
         std::size_t m_nMaxSizeBytes{};
         std::unique_ptr<std::uint8_t[]> m_upMemData;
+
     public:
         enum class PosWay
         {
-            Beg,
+            Set,
             Cur,
             End
         };
@@ -28,54 +29,36 @@ namespace ZQF
         ZxMem();
         ~ZxMem();
         ZxMem(const std::size_t nSize);
+        ZxMem(const std::string_view msPath, std::size_t nReadSize = static_cast<size_t>(-1));
         ZxMem(const ZxMem& rfOBJ);
         ZxMem(ZxMem&& rfOBJ) noexcept;
-        ZxMem(const std::string_view msPath, std::size_t nReadSize = static_cast<size_t>(-1));
+
+    public:
         auto operator=(const ZxMem& rfOBJ)->ZxMem&;
         auto operator=(ZxMem&& rfOBJ) noexcept -> ZxMem&;
+        template <class T> auto operator>>(T& rfData)->ZxMem&;
+        template <class T> auto operator<<(T&& rfData)->ZxMem&;
+
+    public:
+        template <class T = size_t>          auto PosCur() const -> T;
+        template <class T = std::uint8_t*>   auto Ptr() const noexcept -> T;
+        template <class T = std::uint8_t*>   auto PtrCur() const noexcept -> T;
+        template <class T = std::size_t>     auto SizeBytes() const noexcept -> T;
+        template <class T = std::uint8_t>    auto Span() const noexcept -> std::span<T>;
+
+    public:
+        auto PosRewind() -> ZxMem&;
+        auto PosInc(const std::size_t nBytes) -> ZxMem&;
+        template <ZxMem::PosWay eWay = ZxMem::PosWay::Set> auto PosSet(const std::size_t nBytes = 0) -> ZxMem&;
 
     public:
         auto Resize(const std::size_t nNewSizeBytes, const bool isDiscard = true, const bool isRewindPos = true) -> ZxMem&;
 
-        template <class T = std::size_t>
-        auto SizeBytes() const noexcept -> T;
-
-        template <class T = std::uint8_t*>
-        auto Ptr() const noexcept -> T;
-
-        template <class T = std::uint8_t*>
-        auto PtrCur() const noexcept -> T;
-
-        template <class T = std::uint8_t>
-        auto Span() const noexcept -> std::span<T>;
-
-        template <class T = size_t>
-        auto Pos() const->T;
-
-        template <ZxMem::PosWay eWay = ZxMem::PosWay::Beg>
-        auto PosSet(const std::size_t nBytes = 0) -> ZxMem&;
-
-        auto PosInc(const std::size_t nBytes) -> ZxMem&;
-        auto PosRewind() -> ZxMem&;
-
     public:
-        template <class T, std::size_t S>
-        auto Read(const std::span<T, S> spData) -> void;
-
-        template <class T, std::size_t S>
-        auto Write(const std::span<T, S> spData) -> void;
-
-        template<class T>
-        auto operator>>(T& rfData)->ZxMem&;
-
-        template<class T>
-        auto operator<<(T&& rfData)->ZxMem&;
-
-        template <class T>
-        auto Get() -> T;
-
-        template <class T>
-        auto Put(const T& rfData) -> ZxMem&;
+        template <class T> auto Get() -> T;
+        template <class T> auto Put(const T& rfData) -> ZxMem&;
+        template <class T, std::size_t S> auto Read(const std::span<T, S> spData) -> void;
+        template <class T, std::size_t S> auto Write(const std::span<T, S> spData) -> void;
 
     public:
         auto Save(const std::string_view msPath, const bool isCoverExists = true, const bool isCreateDirectories = true) const -> const ZxMem&;
@@ -91,7 +74,7 @@ namespace ZQF
         }
         else
         {
-            static_assert(false, "ZxMem::Ptr<T>(): not pointer type!");
+            static_assert(false, "ZxMem::Ptr<T>() const: not pointer type!");
         }
     }
 
@@ -105,7 +88,7 @@ namespace ZQF
         }
         else
         {
-            static_assert(false, "ZxMem::PtrCur<T>(): not pointer type!");
+            static_assert(false, "ZxMem::PtrCur<T>() const: not pointer type!");
         }
     }
 
@@ -116,7 +99,7 @@ namespace ZQF
     }
 
     template <class T>
-    inline auto ZxMem::Pos() const -> T
+    inline auto ZxMem::PosCur() const -> T
     {
         if constexpr (std::is_integral_v<T>)
         {
@@ -124,14 +107,14 @@ namespace ZQF
         }
         else
         {
-            static_assert(false, "ZxMem::Pos<T>(): not integral type!");
+            static_assert(false, "ZxMem::PosCur<T>() const: not integral type!");
         }
     }
 
     template <ZxMem::PosWay eWay>
     inline auto ZxMem::PosSet(const std::size_t nBytes) -> ZxMem&
     {
-        if constexpr (eWay == ZxMem::PosWay::Beg)
+        if constexpr (eWay == ZxMem::PosWay::Set)
         {
             m_nPos = nBytes;
         }
@@ -162,7 +145,7 @@ namespace ZQF
         }
         else
         {
-            static_assert(false, "ZxMem::SizeBytes<T>(): not integral type!");
+            static_assert(false, "ZxMem::SizeBytes<T>() const: not integral type!");
         }
     }
 
@@ -171,7 +154,7 @@ namespace ZQF
     {
         if (spData.empty()) { return; }
         std::memcpy(spData.data(), this->PtrCur<std::uint8_t*>(), spData.size_bytes());
-        this->PosSet<ZxMem::PosWay::Cur>(spData.size_bytes());
+        this->PosInc(spData.size_bytes());
     }
 
     template <class T, std::size_t S>
@@ -179,7 +162,7 @@ namespace ZQF
     {
         if (spData.empty()) { return; }
         std::memcpy(this->PtrCur<std::uint8_t*>(), spData.data(), spData.size_bytes());
-        this->PosSet<ZxMem::PosWay::Cur>(spData.size_bytes());
+        this->PosInc(spData.size_bytes());
     }
 
     template<class T>

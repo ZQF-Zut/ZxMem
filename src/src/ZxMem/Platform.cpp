@@ -18,11 +18,12 @@ namespace ZQF::ZxMemPrivate
 #ifdef _WIN32
     static auto PathUtf8ToWide(const std::string_view msPath) -> std::pair<std::wstring_view, std::unique_ptr<wchar_t[]>>
     {
-        const std::size_t buffer_max_chars = (msPath.size() * sizeof(char) + 1) * 2;
+        const auto buffer_max_chars = ((msPath.size() * sizeof(char)) + 1) * 2;
         auto buffer = std::make_unique_for_overwrite<wchar_t[]>(buffer_max_chars);
         const auto char_count_real = static_cast<std::size_t>(::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, msPath.data(), static_cast<int>(msPath.size()), buffer.get(), static_cast<int>(buffer_max_chars)));
         buffer[char_count_real] = {};
-        return { std::wstring_view{ buffer.get(), char_count_real }, std::move(buffer) };
+        std::wstring_view cvt_sv{ buffer.get(), char_count_real };
+        return { cvt_sv, std::move(buffer) };
     }
 
     static auto CreateDirectories(const std::pair<std::wstring_view, std::unique_ptr<wchar_t[]>>& rfWidePath) -> void
@@ -42,7 +43,6 @@ namespace ZQF::ZxMemPrivate
             {
                 if (*cur_path_cstr != L'/') { continue; }
 
-                const wchar_t slash_char_tmp = *cur_path_cstr;
                 *cur_path_cstr = {};
                 {
                     if (::GetFileAttributesW(org_path_cstr) == INVALID_FILE_ATTRIBUTES)
@@ -50,7 +50,8 @@ namespace ZQF::ZxMemPrivate
                         ::CreateDirectoryW(org_path_cstr, nullptr);
                     }
                 }
-                *cur_path_cstr = slash_char_tmp;
+                *cur_path_cstr = L'/';
+
                 cur_path_cstr++;
             }
         }

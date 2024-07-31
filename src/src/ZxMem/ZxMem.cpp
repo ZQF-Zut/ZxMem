@@ -20,6 +20,11 @@ namespace ZQF
         this->Resize(nSize, true, true);
     }
 
+    ZxMem::ZxMem(const std::string_view msPath, const std::size_t nReadSize)
+    {
+        this->Load(msPath, nReadSize);
+    }
+
     ZxMem::ZxMem(const ZxMem& rfOBJ)
     {
         this->operator=(rfOBJ);
@@ -28,11 +33,6 @@ namespace ZQF
     ZxMem::ZxMem(ZxMem&& rfOBJ) noexcept
     {
         this->operator=(std::move(rfOBJ));
-    }
-
-    ZxMem::ZxMem(const std::string_view msPath, const std::size_t nReadSize)
-    {
-        this->Load(msPath, nReadSize);
     }
 
     auto ZxMem::operator=(const ZxMem& rfOBJ) -> ZxMem&
@@ -68,12 +68,12 @@ namespace ZQF
     {
         if (m_upMemData == nullptr)
         {
-            m_upMemData = std::make_unique_for_overwrite<uint8_t[]>(nNewSizeBytes);
+            m_upMemData = std::make_unique_for_overwrite<std::uint8_t[]>(nNewSizeBytes);
             m_nMaxSizeBytes = nNewSizeBytes;
         }
         else if (m_nMaxSizeBytes < nNewSizeBytes)
         {
-            auto tmp = std::make_unique_for_overwrite<uint8_t[]>(nNewSizeBytes);
+            auto tmp = std::make_unique_for_overwrite<std::uint8_t[]>(nNewSizeBytes);
             if (isDiscard == false)
             {
                 std::memcpy(tmp.get(), m_upMemData.get(), m_nSizeBytes);
@@ -82,10 +82,7 @@ namespace ZQF
             m_nMaxSizeBytes = nNewSizeBytes;
         }
 
-        if (isRewindPos)
-        {
-            this->PosRewind();
-        }
+        if (isRewindPos) { this->PosRewind(); }
 
         m_nSizeBytes = nNewSizeBytes;
         return *this;
@@ -93,17 +90,19 @@ namespace ZQF
 
     auto ZxMem::PosInc(const std::size_t nBytes) -> ZxMem&
     {
-        return this->PosSet<ZxMem::PosWay::Cur>(nBytes);
+        m_nPos += nBytes;
+        return *this;
     }
 
     auto ZxMem::PosRewind() -> ZxMem&
     {
-        return this->PosSet<ZxMem::PosWay::Beg>(0);
+        m_nPos = 0;
+        return *this;
     }
 
     auto ZxMem::Save(const std::string_view msPath, const bool isCoverExists, const bool isCreateDirectories) const -> const ZxMem&
     {
-        bool status = ZxMemPrivate::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories);
+        const auto status = ZxMemPrivate::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories);
         if (status == false) { throw std::runtime_error(std::format("ZxMem::Save(): save data error! -> msPath: {}", msPath)); }
         return *this;
     }
@@ -115,9 +114,9 @@ namespace ZQF
             const auto file_handle = *file_handle_opt;
             if (const auto file_size_opt = ZxMemPrivate::FileGetSize(file_handle))
             {
-                const std::size_t file_size = static_cast<std::size_t>(*file_size_opt);
-                const std::size_t read_size_bytes = nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize;
-                this->Resize(read_size_bytes, true, true);
+                const auto file_size = *file_size_opt;
+                const auto read_size_bytes = nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize;
+                this->Resize(static_cast<std::size_t>(read_size_bytes), true, true);
                 if (const auto read_bytes_opt = ZxMemPrivate::FileRead(file_handle, this->Span()))
                 {
                     if (*read_bytes_opt == read_size_bytes)
