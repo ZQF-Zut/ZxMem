@@ -7,6 +7,19 @@
 #include <stdexcept>
 
 
+namespace ZQF::ZxMemPrivate
+{
+    template<class>
+    struct is_std_span : std::false_type {};
+
+    template<class T, std::size_t Extent>
+    struct is_std_span<std::span<T, Extent>> : std::true_type {};
+
+    template<class T>
+    inline constexpr bool is_std_span_v = is_std_span<T>::value;
+}
+
+
 namespace ZQF
 {
     class ZxMem
@@ -165,19 +178,10 @@ namespace ZQF
         this->PosInc(spData.size_bytes());
     }
 
-    template<class>
-    struct is_std_span : std::false_type {};
-
-    template<class T, std::size_t Extent>
-    struct is_std_span<std::span<T, Extent>> : std::true_type {};
-
-    template<class T>
-    inline constexpr bool is_std_span_v = is_std_span<T>::value;
-
     template<class T>
     inline auto ZxMem::operator>>(T&& rfData) -> ZxMem&
     {
-        if constexpr (is_std_span_v<std::decay_t<decltype(rfData)>>)
+        if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
         {
             this->Read(rfData);
         }
@@ -192,7 +196,7 @@ namespace ZQF
     template<class T>
     inline auto ZxMem::operator<<(T&& rfData) -> ZxMem&
     {
-        if constexpr (is_std_span_v<std::decay_t<decltype(rfData)>>)
+        if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
         {
             this->Write(rfData);
         }
