@@ -36,7 +36,7 @@ namespace ZQF
     public:
         auto operator=(const ZxMem& rfOBJ)->ZxMem&;
         auto operator=(ZxMem&& rfOBJ) noexcept -> ZxMem&;
-        template <class T> auto operator>>(T& rfData)->ZxMem&;
+        template <class T> auto operator>>(T&& rfData)->ZxMem&;
         template <class T> auto operator<<(T&& rfData)->ZxMem&;
 
     public:
@@ -56,7 +56,7 @@ namespace ZQF
 
     public:
         template <class T> auto Get() -> T;
-        template <class T> auto Put(const T& rfData) -> ZxMem&;
+        template <class T> auto Put(T&& rfData) -> ZxMem&;
         template <class T, std::size_t S> auto Read(const std::span<T, S> spData) -> void;
         template <class T, std::size_t S> auto Write(const std::span<T, S> spData) -> void;
 
@@ -165,18 +165,25 @@ namespace ZQF
         this->PosInc(spData.size_bytes());
     }
 
-    template<class T>
-    inline auto ZxMem::operator>>(T& rfData) -> ZxMem&
-    {
-        using T_decay = std::decay_t<decltype(rfData)>;
+    template<class>
+    struct is_std_span : std::false_type {};
 
-        if constexpr (std::is_integral_v<T_decay> || std::is_floating_point_v<T_decay>)
+    template<class T, std::size_t Extent>
+    struct is_std_span<std::span<T, Extent>> : std::true_type {};
+
+    template<class T>
+    inline constexpr bool is_std_span_v = is_std_span<T>::value;
+
+    template<class T>
+    inline auto ZxMem::operator>>(T&& rfData) -> ZxMem&
+    {
+        if constexpr (is_std_span_v<std::decay_t<decltype(rfData)>>)
         {
-            this->Read(std::span{ &rfData, 1 });
+            this->Read(rfData);
         }
         else
         {
-            this->Read(std::span{ rfData });
+            this->Read(std::span{ &rfData, 1 });
         }
 
         return *this;
@@ -185,15 +192,13 @@ namespace ZQF
     template<class T>
     inline auto ZxMem::operator<<(T&& rfData) -> ZxMem&
     {
-        using T_decay = std::decay_t<decltype(rfData)>;
-
-        if constexpr (std::is_integral_v<T_decay> || std::is_floating_point_v<T_decay>)
+        if constexpr (is_std_span_v<std::decay_t<decltype(rfData)>>)
         {
-            this->Write(std::span{ &rfData, 1 });
+            this->Write(rfData);
         }
         else
         {
-            this->Write(std::span{ rfData });
+            this->Write(std::span{ &rfData, 1 });
         }
 
         return *this;
@@ -208,8 +213,8 @@ namespace ZQF
     }
 
     template <class T>
-    inline auto ZxMem::Put(const T& rfData) -> ZxMem&
+    inline auto ZxMem::Put(T&& rfData) -> ZxMem&
     {
-        return this->operator<<(rfData);
+        return this->operator<<(std::forward<T>(rfData));
     }
 }

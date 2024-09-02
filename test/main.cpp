@@ -59,8 +59,6 @@ static auto TestZxMemIO() -> void
     [[maybe_unused]] int a = 0;
 }
 
-
-
 auto main() -> int
 {
     try
