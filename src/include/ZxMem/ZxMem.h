@@ -57,7 +57,9 @@ namespace ZQF
         template <class T = std::uint8_t*>   auto Ptr() const noexcept -> T;
         template <class T = std::uint8_t*>   auto PtrCur() const noexcept -> T;
         template <class T = std::size_t>     auto SizeBytes() const noexcept -> T;
+        template <class T = std::size_t>     auto SizeBytesCur() const noexcept -> T;
         template <class T = std::uint8_t>    auto Span() const noexcept -> std::span<T>;
+        template <class T = std::uint8_t>    auto SpanCur() const noexcept -> std::span<T>;
 
     public:
         auto PosRewind() -> ZxMem&;
@@ -112,6 +114,12 @@ namespace ZQF
     }
 
     template <class T>
+    inline auto ZxMem::SpanCur() const noexcept -> std::span<T>
+    {
+        return std::span{ this->PtrCur<T*>(), this->SizeBytes() / sizeof(T) };
+    }
+
+    template <class T>
     inline auto ZxMem::PosCur() const -> T
     {
         if constexpr (std::is_integral_v<T>)
@@ -159,6 +167,19 @@ namespace ZQF
         else
         {
             static_assert(false, "ZxMem::SizeBytes<T>() const: not integral type!");
+        }
+    }
+
+    template <class T>
+    inline auto ZxMem::SizeBytesCur() const noexcept -> T
+    {
+        if constexpr (std::is_integral_v<T>)
+        {
+            return static_cast<T>(m_nSizeBytes - m_nPos);
+        }
+        else
+        {
+            static_assert(false, "ZxMem::SizeBytesCur<T>() const: not integral type!");
         }
     }
 
