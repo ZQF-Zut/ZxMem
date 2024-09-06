@@ -204,7 +204,11 @@ namespace ZQF
     template<class T>
     inline auto ZxMem::operator>>(T&& rfData) -> ZxMem&
     {
-        if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
+        if constexpr (std::is_same_v<T, ZxMem&> || std::is_same_v<T, const ZxMem&> || std::is_same_v<T, ZxMem>)
+        {
+            static_assert(false, "ZxMem::operator>>(): self type disabled!");
+        }
+        else if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
         {
             this->Read(rfData);
         }
@@ -219,7 +223,11 @@ namespace ZQF
     template<class T>
     inline auto ZxMem::operator<<(T&& rfData) -> ZxMem&
     {
-        if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
+        if constexpr (std::is_same_v<T, ZxMem&> || std::is_same_v<T, const ZxMem&> || std::is_same_v<T, ZxMem>)
+        {
+            static_assert(false, "ZxMem::operator>>(): self type disabled!");
+        }
+        else if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
         {
             this->Write(rfData);
         }
