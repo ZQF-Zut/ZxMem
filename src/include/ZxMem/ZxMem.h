@@ -187,6 +187,7 @@ namespace ZQF
     inline auto ZxMem::Read(const std::span<T, S> spData) -> void
     {
         if (spData.empty()) { return; }
+        assert(this->SizeBytesCur() >= spData.size_bytes());
         std::memcpy(spData.data(), this->PtrCur<std::uint8_t*>(), spData.size_bytes());
         this->PosInc(spData.size_bytes());
     }
@@ -195,6 +196,7 @@ namespace ZQF
     inline auto ZxMem::Write(const std::span<T, S> spData) -> void
     {
         if (spData.empty()) { return; }
+        assert(this->SizeBytesCur() >= spData.size_bytes());
         std::memcpy(this->PtrCur<std::uint8_t*>(), spData.data(), spData.size_bytes());
         this->PosInc(spData.size_bytes());
     }
