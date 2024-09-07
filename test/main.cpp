@@ -59,11 +59,11 @@ static auto TestZxMemIO() -> void
     [[maybe_unused]] int a = 0;
 }
 
-auto main() -> int
+auto main(void) -> int
 {
     try
     {
-        TestZxMemIO();
+        ::TestZxMemIO();
     }
     catch (const std::exception& err)
     {

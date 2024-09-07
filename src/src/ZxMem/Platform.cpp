@@ -102,7 +102,7 @@ namespace ZQF::ZxMemPrivate
 #else
     auto FileOpenViaReadMode(const std::string_view msPath) -> std::optional<FILE_HANLDE_TYPE>
     {
-        const auto file_handle = ::open(msPath.data(), O_RDONLY, 0666);
+        const auto file_handle{ ::open(msPath.data(), O_RDONLY, 0666) };
         return (file_handle == -1) ? std::nullopt : std::optional{ file_handle };
     }
 
@@ -119,28 +119,28 @@ namespace ZQF::ZxMemPrivate
 
     auto FileRead(const FILE_HANLDE_TYPE hFile, const std::span<std::uint8_t> spBuffer) -> std::optional<std::size_t>
     {
-        const auto read_bytes = ::read(hFile, spBuffer.data(), spBuffer.size_bytes());
+        const auto read_bytes{ ::read(hFile, spBuffer.data(), spBuffer.size_bytes()) };
         return (read_bytes == -1) ? std::nullopt : std::optional{ static_cast<std::size_t>(read_bytes) };
     }
 
     static auto CreateDirectories(const std::string_view msPath) -> void
     {
-        const auto pos = msPath.rfind('/');
+        const auto pos{ msPath.rfind('/') };
         if ((pos == std::string_view::npos) || (pos == 1)) { return; }
 
-        auto path_buffer = std::make_unique_for_overwrite<char[]>(msPath.size());
+        const auto path_buffer{ std::make_unique_for_overwrite<char[]>(msPath.size()) };
         std::memcpy(path_buffer.get(), msPath.data(), msPath.size());
 
         path_buffer.get()[pos + 1] = {}; // rm file_name
 
-        char* cur_path_cstr = path_buffer.get();
-        const char* org_path_cstr = path_buffer.get();
+        char* cur_path_cstr{ path_buffer.get() };
+        const char* org_path_cstr{ path_buffer.get() };
 
         while (*cur_path_cstr++ != '\0')
         {
             if (*cur_path_cstr != '/') { continue; }
 
-            const char slash_char_tmp = *cur_path_cstr;
+            const char slash_char_tmp{ *cur_path_cstr };
             *cur_path_cstr = {};
             {
                 if (::access(org_path_cstr, X_OK) == -1)
@@ -156,11 +156,11 @@ namespace ZQF::ZxMemPrivate
     auto SaveDataViaPathImp(const std::string_view msPath, const std::span<const std::uint8_t> spData, const bool isCoverExists, const bool isCreateDirectories) -> bool
     {
         if (isCreateDirectories) { ZxMemPrivate::CreateDirectories(msPath); }
-        constexpr auto create_always = O_CREAT | O_WRONLY | O_TRUNC;
-        constexpr auto create_new = O_CREAT | O_WRONLY | O_EXCL;
-        const auto file_handle = ::open(msPath.data(), isCoverExists ? create_always : create_new, 0666);  // NOLINT
+        constexpr auto create_always{ O_CREAT | O_WRONLY | O_TRUNC };
+        constexpr auto create_new{ O_CREAT | O_WRONLY | O_EXCL };
+        const auto file_handle{ ::open(msPath.data(), isCoverExists ? create_always : create_new, 0666) };
         if (file_handle == -1) { return false; }
-        const auto written_bytes = ::write(file_handle, spData.data(), spData.size_bytes());
+        const auto written_bytes{ ::write(file_handle, spData.data(), spData.size_bytes()) };
         if (written_bytes == -1) { ::close(file_handle); return false; }
         return (::close(file_handle) == -1) ? false : true;
     }
