@@ -1,4 +1,4 @@
-#include <ZxMem/Platform.h>
+#include "Plat.h"
 #include <span>
 #include <memory>
 
@@ -13,7 +13,7 @@
 #endif
 
 
-namespace ZQF::ZxMemPrivate
+namespace ZQF::Zut::ZxMemPlat
 {
 #ifdef _WIN32
     static auto PathUtf8ToWide(const std::string_view msPath) -> std::pair<std::wstring_view, std::unique_ptr<wchar_t[]>>
@@ -87,7 +87,7 @@ namespace ZQF::ZxMemPrivate
     auto SaveDataViaPathImp(const std::string_view msPath, const std::span<const std::uint8_t> spData, const bool isCoverExists, const bool isCreateDirectories) -> bool
     {
         auto wide_path = PathUtf8ToWide(msPath);
-        if (isCreateDirectories) { ZxMemPrivate::CreateDirectories(wide_path); }
+        if (isCreateDirectories) { ZxMemPlat::CreateDirectories(wide_path); }
         const auto hfile = ::CreateFileW(wide_path.first.data(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, isCoverExists ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (hfile == INVALID_HANDLE_VALUE) { return false; }
         DWORD write{};
@@ -155,7 +155,7 @@ namespace ZQF::ZxMemPrivate
 
     auto SaveDataViaPathImp(const std::string_view msPath, const std::span<const std::uint8_t> spData, const bool isCoverExists, const bool isCreateDirectories) -> bool
     {
-        if (isCreateDirectories) { ZxMemPrivate::CreateDirectories(msPath); }
+        if (isCreateDirectories) { ZxMemPlat::CreateDirectories(msPath); }
         constexpr auto create_always{ O_CREAT | O_WRONLY | O_TRUNC };
         constexpr auto create_new{ O_CREAT | O_WRONLY | O_EXCL };
         const auto file_handle{ ::open(msPath.data(), isCoverExists ? create_always : create_new, 0666) };

@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 
-namespace ZQF::ZxMemPrivate
+namespace ZQF::Zut::ZxMemPrivate
 {
     template<class>
     struct is_std_span : std::false_type {};
@@ -21,7 +21,7 @@ namespace ZQF::ZxMemPrivate
 }
 
 
-namespace ZQF
+namespace ZQF::Zut
 {
     class ZxMem
     {
@@ -54,7 +54,7 @@ namespace ZQF
         template <class T> auto operator<<(T&& rfData)->ZxMem&;
 
     public:
-        template <class T = size_t>          auto PosCur() const -> T;
+        template <class T = std::size_t>     auto PosCur() const -> T;
         template <class T = std::uint8_t*>   auto Ptr() const noexcept -> T;
         template <class T = std::uint8_t*>   auto PtrCur() const noexcept -> T;
         template <class T = std::size_t>     auto SizeBytes() const noexcept -> T;
@@ -78,7 +78,7 @@ namespace ZQF
 
     public:
         auto Save(const std::string_view msPath, const bool isCoverExists = true, const bool isCreateDirectories = true) const -> const ZxMem&;
-        auto Load(const std::string_view msPath, const std::size_t nReadSize = static_cast<size_t>(-1)) -> ZxMem&;
+        auto Load(const std::string_view msPath, const std::size_t nReadSize = static_cast<std::size_t>(-1)) -> ZxMem&;
     };
 
     template <class T>

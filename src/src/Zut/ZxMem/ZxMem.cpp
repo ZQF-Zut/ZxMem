@@ -1,9 +1,9 @@
-#include <ZxMem/ZxMem.h>
-#include <ZxMem/Platform.h>
+#include "ZxMem.h"
+#include "Plat.h"
 #include <format>
 
 
-namespace ZQF
+namespace ZQF::Zut
 {
     ZxMem::ZxMem()
     {
@@ -102,32 +102,32 @@ namespace ZQF
 
     auto ZxMem::Save(const std::string_view msPath, const bool isCoverExists, const bool isCreateDirectories) const -> const ZxMem&
     {
-        const auto status = ZxMemPrivate::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories);
+        const auto status = ZxMemPlat::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories);
         if (status == false) { throw std::runtime_error(std::format("ZxMem::Save(): save data error! -> msPath: {}", msPath)); }
         return *this;
     }
 
     auto ZxMem::Load(const std::string_view msPath, const std::size_t nReadSize) -> ZxMem&
     {
-        if (const auto file_handle_opt = ZxMemPrivate::FileOpenViaReadMode(msPath))
+        if (const auto file_handle_opt = ZxMemPlat::FileOpenViaReadMode(msPath))
         {
             const auto file_handle = *file_handle_opt;
-            if (const auto file_size_opt = ZxMemPrivate::FileGetSize(file_handle))
+            if (const auto file_size_opt = ZxMemPlat::FileGetSize(file_handle))
             {
                 const auto file_size = *file_size_opt;
                 const auto read_size_bytes = nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize;
                 this->Resize(static_cast<std::size_t>(read_size_bytes), true, true);
-                if (const auto read_bytes_opt = ZxMemPrivate::FileRead(file_handle, this->Span()))
+                if (const auto read_bytes_opt = ZxMemPlat::FileRead(file_handle, this->Span()))
                 {
                     if (*read_bytes_opt == read_size_bytes)
                     {
-                        ZxMemPrivate::FileClose(file_handle);
+                        ZxMemPlat::FileClose(file_handle);
                         return this->PosRewind();
                     }
                 }
             }
 
-            ZxMemPrivate::FileClose(file_handle);
+            ZxMemPlat::FileClose(file_handle);
         }
 
         throw std::runtime_error(std::format("ZxMem::Load(): error! -> msPath: {}", msPath));

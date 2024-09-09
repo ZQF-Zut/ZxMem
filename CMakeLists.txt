@@ -1,5 +1,5 @@
 # ZxMem Main
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 # Project Name
 project(Zut_ZxMem_Main)
@@ -10,9 +10,9 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 # Source
-add_subdirectory(src)
+add_subdirectory("src")
 
 # On Test Config
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    add_subdirectory(test)
+    add_subdirectory("test")
 endif()

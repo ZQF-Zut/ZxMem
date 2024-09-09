@@ -3,25 +3,25 @@
 #include <array>
 #include <format>
 #include <iostream>
-#include <ZxMem/ZxMem.h>
+#include <Zut/ZxMem.h>
 
 
 static auto TestZxMemIO() -> void
 {
     {
         std::array<std::uint16_t, 2> ee = { 131,66 };
-        ZQF::ZxMem mem{ 4 };
+        ZxMem mem{ 4 };
         mem.Write(std::span{ ee });
         [[maybe_unused]] int a = 0;
 
-        mem.PosSet<ZQF::ZxMem::PosWay::Cur>(static_cast<std::size_t>(-4));
+        mem.PosSet<ZxMem::PosWay::Cur>(static_cast<std::size_t>(-4));
 
         [[maybe_unused]] std::uint16_t x0 = mem.Get<std::uint16_t>();
         [[maybe_unused]] std::uint16_t x1 = mem.Get<std::uint16_t>();
     }
 
 
-    ZQF::ZxMem mem(100);
+    ZxMem mem(100);
 
     std::uint32_t tmp_val0 = 222;
     std::double_t tmp_val1 = 111.11;
@@ -37,7 +37,7 @@ static auto TestZxMemIO() -> void
     std::uint16_t tmp_val4 = 0xFF;
     mem.Put(tmp_val2).Put(tmp_val3).Put(tmp_val4);
 
-    mem.PosSet<ZQF::ZxMem::PosWay::Set>();
+    mem.PosSet<ZxMem::PosWay::Set>();
 
     assert(tmp_val0 == mem.Get<std::uint32_t>());
     assert(tmp_val1 == mem.Get<std::double_t>());

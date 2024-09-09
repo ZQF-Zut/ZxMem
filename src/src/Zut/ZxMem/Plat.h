@@ -5,7 +5,7 @@
 #include <string_view>
 
 
-namespace ZQF::ZxMemPrivate
+namespace ZQF::Zut::ZxMemPlat
 {
 #ifdef _WIN32
     using FILE_HANLDE_TYPE = void*;
