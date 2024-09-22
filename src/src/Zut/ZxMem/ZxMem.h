@@ -117,7 +117,7 @@ namespace ZQF::Zut
     template <class T>
     inline auto ZxMem::SpanCur() const noexcept -> std::span<T>
     {
-        return std::span{ this->PtrCur<T*>(), this->SizeBytes() / sizeof(T) };
+        return std::span{ this->PtrCur<T*>(), this->SizeBytesCur() / sizeof(T) };
     }
 
     template <class T>
