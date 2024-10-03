@@ -73,7 +73,7 @@ namespace ZQF::Zut
         }
         else if (m_nMaxSizeBytes < nNewSizeBytes)
         {
-            auto tmp = std::make_unique_for_overwrite<std::uint8_t[]>(nNewSizeBytes);
+            auto tmp{ std::make_unique_for_overwrite<std::uint8_t[]>(nNewSizeBytes) };
             if (isDiscard == false)
             {
                 std::memcpy(tmp.get(), m_upMemData.get(), m_nSizeBytes);
@@ -102,22 +102,22 @@ namespace ZQF::Zut
 
     auto ZxMem::Save(const std::string_view msPath, const bool isCoverExists, const bool isCreateDirectories) const -> const ZxMem&
     {
-        const auto status = ZxMemPlat::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories);
+        const auto status{ ZxMemPlat::SaveDataViaPathImp(msPath, this->Span(), isCoverExists, isCreateDirectories) };
         if (status == false) { throw std::runtime_error(std::format("ZxMem::Save(): save data error! -> msPath: {}", msPath)); }
         return *this;
     }
 
     auto ZxMem::Load(const std::string_view msPath, const std::size_t nReadSize) -> ZxMem&
     {
-        if (const auto file_handle_opt = ZxMemPlat::FileOpenViaReadMode(msPath))
+        if (const auto file_handle_opt{ ZxMemPlat::FileOpenViaReadMode(msPath) })
         {
-            const auto file_handle = *file_handle_opt;
-            if (const auto file_size_opt = ZxMemPlat::FileGetSize(file_handle))
+            const auto file_handle{ *file_handle_opt };
+            if (const auto file_size_opt{ ZxMemPlat::FileGetSize(file_handle) })
             {
-                const auto file_size = *file_size_opt;
-                const auto read_size_bytes = nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize;
+                const auto file_size{ *file_size_opt };
+                const auto read_size_bytes{ nReadSize == static_cast<size_t>(-1) ? file_size : nReadSize };
                 this->Resize(static_cast<std::size_t>(read_size_bytes), true, true);
-                if (const auto read_bytes_opt = ZxMemPlat::FileRead(file_handle, this->Span()))
+                if (const auto read_bytes_opt{ ZxMemPlat::FileRead(file_handle, this->Span()) })
                 {
                     if (*read_bytes_opt == read_size_bytes)
                     {

@@ -42,10 +42,10 @@ namespace ZQF::Zut
     public:
         ZxMem();
         ~ZxMem();
-        ZxMem(const std::size_t nSize);
-        ZxMem(const std::string_view msPath, std::size_t nReadSize = static_cast<size_t>(-1));
         ZxMem(const ZxMem& rfOBJ);
         ZxMem(ZxMem&& rfOBJ) noexcept;
+        ZxMem(const std::size_t nSize);
+        ZxMem(const std::string_view msPath, std::size_t nReadSize = static_cast<size_t>(-1));
 
     public:
         auto operator=(const ZxMem& rfOBJ)->ZxMem&;
@@ -77,8 +77,8 @@ namespace ZQF::Zut
         template <class T, std::size_t S> auto Write(const std::span<T, S> spData) -> void;
 
     public:
-        auto Save(const std::string_view msPath, const bool isCoverExists = true, const bool isCreateDirectories = true) const -> const ZxMem&;
         auto Load(const std::string_view msPath, const std::size_t nReadSize = static_cast<std::size_t>(-1)) -> ZxMem&;
+        auto Save(const std::string_view msPath, const bool isCoverExists = true, const bool isCreateDirectories = true) const -> const ZxMem&;
     };
 
     template <class T>

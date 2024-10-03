@@ -21,7 +21,10 @@ static auto TestZxMemIO() -> void
     }
 
 
-    ZxMem mem(100);
+    ZxMem mem{ 100 };
+
+    std::string mx{ "12329th832h9t93t23" };
+    mem << std::span{ mx.data(), mx.size() - 3 };
 
     std::uint32_t tmp_val0 = 222;
     std::double_t tmp_val1 = 111.11;
