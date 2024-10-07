@@ -3,30 +3,36 @@
 
 
 #define ZXMEM_REFLRECT(...)                                                                                                      \
-    auto BinaryStore(ZxMem& mem) const -> void                                                                                   \
+    auto ReflexBinaryStore() const -> ZxMem                                                                                      \
     {                                                                                                                            \
-        this->_BinaryStore(mem, a, b, c, d, e, f, g, h, i);                                                                      \
+        ZxMem mem{ this->ReflexSizeBytes() };                                                                                    \
+        this->ReflexBinaryStore(mem); return mem;                                                                                \
     }                                                                                                                            \
                                                                                                                                  \
-    auto BinaryStore() const -> ZxMem                                                                                            \
+    auto ReflexBinaryStore(ZxMem& mem) const -> void                                                                             \
     {                                                                                                                            \
-        ZxMem mem{ this->SizeBytes() };                                                                                          \
-        this->BinaryStore(mem); return mem;                                                                                      \
+        this->_ReflexBinaryStore(mem, a, b, c, d, e, f, g, h, i);                                                                \
     }                                                                                                                            \
                                                                                                                                  \
-    auto BinaryLoad(ZxMem& mem) -> void                                                                                          \
+    auto ReflexBinaryLoad(const std::string_view msPath) -> void                                                                 \
     {                                                                                                                            \
-        this->_BinaryLoad(mem, a, b, c, d, e, f, g, h, i);                                                                       \
+        ZxMem mem{ msPath };                                                                                                     \
+        this->_ReflexBinaryLoad(mem, a, b, c, d, e, f, g, h, i);                                                                 \
     }                                                                                                                            \
                                                                                                                                  \
-    constexpr auto SizeBytes() const -> std::size_t                                                                              \
+    auto ReflexBinaryLoad(ZxMem& mem) -> void                                                                                    \
+    {                                                                                                                            \
+        this->_ReflexBinaryLoad(mem, a, b, c, d, e, f, g, h, i);                                                                 \
+    }                                                                                                                            \
+                                                                                                                                 \
+    constexpr auto ReflexSizeBytes() const -> std::size_t                                                                        \
     {                                                                                                                            \
         return this->_SizeBytes(a, b, c, d, e, f, g, h, i);                                                                      \
     }                                                                                                                            \
                                                                                                                                  \
 private:                                                                                                                         \
     template<typename IO_Type, typename Field_Type>                                                                              \
-    auto _FieldWrite(IO_Type& writer, Field_Type&& field) const -> void                                                          \
+    auto _ReflexFieldWrite(IO_Type& writer, Field_Type&& field) const -> void                                                    \
     {                                                                                                                            \
         using field_type_t = std::decay_t<Field_Type>;                                                                           \
                                                                                                                                  \
@@ -45,7 +51,7 @@ private:                                                                        
             if constexpr (ZQF::Zut::ZxMemTraits::is_span_able<field_type_t>)                                                     \
             {                                                                                                                    \
                 /* string, vector, array */                                                                                      \
-                this->_FieldWrite(writer, std::span{ field });                                                                   \
+                this->_ReflexFieldWrite(writer, std::span{ field });                                                             \
             }                                                                                                                    \
             /* not span able */                                                                                                  \
             else                                                                                                                 \
@@ -55,13 +61,13 @@ private:                                                                        
                     /* map, unordered_map*/                                                                                      \
                     if constexpr (ZQF::Zut::ZxMemTraits::is_std_map<field_type_t>)                                               \
                     {                                                                                                            \
-                        this->_FieldWrite(writer, element.first);                                                                \
-                        this->_FieldWrite(writer, element.second);                                                               \
+                        this->_ReflexFieldWrite(writer, element.first);                                                          \
+                        this->_ReflexFieldWrite(writer, element.second);                                                         \
                     }                                                                                                            \
                     /* list, set, unordered_set, forward_list*/                                                                  \
                     else                                                                                                         \
                     {                                                                                                            \
-                        this->_FieldWrite(writer, element);                                                                      \
+                        this->_ReflexFieldWrite(writer, element);                                                                \
                     }                                                                                                            \
                 }                                                                                                                \
             }                                                                                                                    \
@@ -73,7 +79,7 @@ private:                                                                        
     }                                                                                                                            \
                                                                                                                                  \
     template<typename IO_Type, typename Field_Type>                                                                              \
-    auto _FieldRead(IO_Type& reader, Field_Type&& filed) -> void                                                                 \
+    auto _ReflexFieldRead(IO_Type& reader, Field_Type&& filed) -> void                                                           \
     {                                                                                                                            \
         using field_type_t = std::decay_t<Field_Type>;                                                                           \
                                                                                                                                  \
@@ -92,7 +98,7 @@ private:                                                                        
                     filed.resize(ele_cnt);                                                                                       \
                 }                                                                                                                \
                                                                                                                                  \
-                this->_FieldRead(reader, std::span{ filed });                                                                    \
+                this->_ReflexFieldRead(reader, std::span{ filed });                                                              \
             }                                                                                                                    \
             else                                                                                                                 \
             {                                                                                                                    \
@@ -102,20 +108,20 @@ private:                                                                        
                     {                                                                                                            \
                         typename field_type_t::key_type map_key;                                                                 \
                         typename field_type_t::mapped_type map_val;                                                              \
-                        this->_FieldRead(reader, map_key);                                                                       \
-                        this->_FieldRead(reader, map_val);                                                                       \
+                        this->_ReflexFieldRead(reader, map_key);                                                                 \
+                        this->_ReflexFieldRead(reader, map_val);                                                                 \
                         filed.try_emplace(std::move(map_key), std::move(map_val));                                               \
                     }                                                                                                            \
                     else if constexpr (ZQF::Zut::ZxMemTraits::is_std_set<field_type_t>)                                          \
                     {                                                                                                            \
                         typename field_type_t::key_type set_key;                                                                 \
-                        this->_FieldRead(reader, set_key);                                                                       \
+                        this->_ReflexFieldRead(reader, set_key);                                                                 \
                         filed.emplace(std::move(set_key));                                                                       \
                     }                                                                                                            \
                     else                                                                                                         \
                     {                                                                                                            \
                         typename field_type_t::value_type normal_val;                                                            \
-                        this->_FieldRead(reader, normal_val);                                                                    \
+                        this->_ReflexFieldRead(reader, normal_val);                                                              \
                         filed.push_back(std::move(normal_val));                                                                  \
                     }                                                                                                            \
                 }                                                                                                                \
@@ -128,7 +134,7 @@ private:                                                                        
     }                                                                                                                            \
                                                                                                                                  \
     template<typename Field_Type>                                                                                                \
-    auto _FieldBytes(Field_Type&& field) const -> std::size_t                                                                    \
+    auto _ReflexFieldBytes(Field_Type&& field) const -> std::size_t                                                              \
     {                                                                                                                            \
         using field_type_t = std::decay_t<Field_Type>;                                                                           \
                                                                                                                                  \
@@ -145,7 +151,7 @@ private:                                                                        
             std::size_t bytes{ 4 };                                                                                              \
             if constexpr (ZQF::Zut::ZxMemTraits::is_span_able<field_type_t>)                                                     \
             {                                                                                                                    \
-                bytes += this->_FieldBytes(std::span{ field });                                                                  \
+                bytes += this->_ReflexFieldBytes(std::span{ field });                                                            \
             }                                                                                                                    \
             else                                                                                                                 \
             {                                                                                                                    \
@@ -153,12 +159,12 @@ private:                                                                        
                 {                                                                                                                \
                     if constexpr (ZQF::Zut::ZxMemTraits::is_std_map<field_type_t>)                                               \
                     {                                                                                                            \
-                        bytes += this->_FieldBytes(element.first);                                                               \
-                        bytes += this->_FieldBytes(element.second);                                                              \
+                        bytes += this->_ReflexFieldBytes(element.first);                                                         \
+                        bytes += this->_ReflexFieldBytes(element.second);                                                        \
                     }                                                                                                            \
                     else                                                                                                         \
                     {                                                                                                            \
-                        bytes += this->_FieldBytes(element);                                                                     \
+                        bytes += this->_ReflexFieldBytes(element);                                                               \
                     }                                                                                                            \
                 }                                                                                                                \
             }                                                                                                                    \
@@ -173,18 +179,18 @@ private:                                                                        
     template<typename ...Arg> constexpr auto _SizeBytes(const Arg&... args) const -> std::size_t                                 \
     {                                                                                                                            \
         std::size_t bytes{};                                                                                                     \
-        ((bytes += this->_FieldBytes(args)), ...);                                                                               \
+        ((bytes += this->_ReflexFieldBytes(args)), ...);                                                                         \
         return bytes;                                                                                                            \
     }                                                                                                                            \
                                                                                                                                  \
     template<typename ...Arg>                                                                                                    \
-    auto _BinaryStore(ZxMem& mem, const Arg&... args) const -> void                                                              \
+    auto _ReflexBinaryStore(ZxMem& mem, const Arg&... args) const -> void                                                        \
     {                                                                                                                            \
-        (this->_FieldWrite(mem, args), ...);                                                                                     \
+        (this->_ReflexFieldWrite(mem, args), ...);                                                                               \
     }                                                                                                                            \
                                                                                                                                  \
     template<typename ...Arg>                                                                                                    \
-    auto _BinaryLoad(ZxMem& mem, Arg&... args) -> void                                                                           \
+    auto _ReflexBinaryLoad(ZxMem& mem, Arg&... args) -> void                                                                     \
     {                                                                                                                            \
-        (this->_FieldRead(mem, args), ...);                                                                                      \
+        (this->_ReflexFieldRead(mem, args), ...);                                                                                \
     }                                                                                                                            \
