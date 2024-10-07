@@ -6,19 +6,7 @@
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
-
-
-namespace ZQF::Zut::ZxMemPrivate
-{
-    template<class>
-    struct is_std_span : std::false_type {};
-
-    template<class T, std::size_t Extent>
-    struct is_std_span<std::span<T, Extent>> : std::true_type {};
-
-    template<class T>
-    inline constexpr bool is_std_span_v = is_std_span<T>::value;
-}
+#include <Zut/ZxMem/Traits.h>
 
 
 namespace ZQF::Zut
@@ -205,11 +193,13 @@ namespace ZQF::Zut
     template<class T>
     inline auto ZxMem::operator>>(T&& rfData) -> ZxMem&
     {
-        if constexpr (std::is_same_v<T, ZxMem&> || std::is_same_v<T, const ZxMem&> || std::is_same_v<T, ZxMem>)
+        using data_type = std::decay_t<decltype(rfData)>;
+
+        if constexpr (std::is_same_v<data_type, ZxMem>)
         {
             static_assert(false, "ZxMem::operator>>(): self type disabled!");
         }
-        else if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
+        else if constexpr (ZxMemTraits::is_std_span<data_type>)
         {
             this->Read(rfData);
         }
@@ -224,11 +214,13 @@ namespace ZQF::Zut
     template<class T>
     inline auto ZxMem::operator<<(T&& rfData) -> ZxMem&
     {
-        if constexpr (std::is_same_v<T, ZxMem&> || std::is_same_v<T, const ZxMem&> || std::is_same_v<T, ZxMem>)
+        using data_type = std::decay_t<decltype(rfData)>;
+
+        if constexpr (std::is_same_v<data_type, ZxMem>)
         {
             static_assert(false, "ZxMem::operator>>(): self type disabled!");
         }
-        else if constexpr (ZxMemPrivate::is_std_span_v<std::decay_t<decltype(rfData)>>)
+        else if constexpr (ZxMemTraits::is_std_span<data_type>)
         {
             this->Write(rfData);
         }
