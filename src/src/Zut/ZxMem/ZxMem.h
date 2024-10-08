@@ -199,7 +199,7 @@ namespace ZQF::Zut
         {
             static_assert(false, "ZxMem::operator>>(): self type disabled!");
         }
-        else if constexpr (ZxMemTraits::is_std_span<data_type>)
+        else if constexpr (ZxMemTraits::is_std_span_v<data_type>)
         {
             this->Read(rfData);
         }
@@ -220,7 +220,7 @@ namespace ZQF::Zut
         {
             static_assert(false, "ZxMem::operator>>(): self type disabled!");
         }
-        else if constexpr (ZxMemTraits::is_std_span<data_type>)
+        else if constexpr (ZxMemTraits::is_std_span_v<data_type>)
         {
             this->Write(rfData);
         }

@@ -1,9 +1,11 @@
 #pragma once
-#include <cstdint>
-#include <span>
-#include <array>
 #include <set>
 #include <map>
+#include <span>
+#include <deque>
+#include <array>
+#include <cstdint>
+#include <forward_list>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -31,42 +33,118 @@ namespace ZQF::Zut::ZxMemTraits
         t.size();
     };
 
-    template<typename T>
-    concept is_std_span = requires
-    {
-        std::same_as<std::decay_t<T>, std::span<typename std::decay_t<T>::element_type, std::decay_t<T>::extent>>;
-    };
 
     template<typename T>
-    concept is_std_pair = requires
-    {
-        std::same_as<std::decay_t<T>, std::pair<typename std::decay_t<T>::first_type, typename std::decay_t<T>::second_type>>;
-    };
+    constexpr bool is_arithmetic_v = std::is_arithmetic_v<T>;
+
+
+    // std::basic_string
+    template <typename T>
+    struct is_std_basic_string : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_basic_string <std::basic_string<ArgsT...>> : std::true_type {};
 
     template <typename T>
-    struct is_std_array_imp : std::false_type{};
+    constexpr bool is_std_basic_string_v = is_std_basic_string<T>::value;
+
+    // std::array
+    template <typename T>
+    struct is_std_array : std::false_type {};
 
     template <typename T, size_t N>
-    struct is_std_array_imp<std::array<T, N>> : public std::true_type{};
+    struct is_std_array <std::array<T, N>> : std::true_type {};
 
     template <typename T>
-    concept is_std_array = is_std_array_imp<T>::value;
+    constexpr bool is_std_array_v = is_std_array<T>::value;
 
-    template<typename T>
-    concept is_std_set = requires
-    {
-        std::same_as<std::decay_t<T>, std::set<typename std::decay_t<T>::key_type>> || std::same_as<std::decay_t<T>, std::unordered_set<typename std::decay_t<T>::key_type>>;
-    };
+    // std::vector
+    template <typename T>
+    struct is_std_vector : std::false_type {};
 
-    template<typename T>
-    concept is_std_map = requires
-    {
-        std::same_as<std::decay_t<T>, std::map<typename std::decay_t<T>::key_type, typename std::decay_t<T>::mapped_type>> || std::same_as<std::decay_t<T>, std::unordered_map<typename std::decay_t<T>::key_type, typename std::decay_t<T>::mapped_type>>;
-    };
+    template <typename... ArgsT>
+    struct is_std_vector <std::vector<ArgsT...>> : std::true_type {};
 
-    template<typename T>
-    concept is_arithmetic = requires
-    {
-        requires std::is_arithmetic_v<T>;
-    };
+    template <typename T>
+    constexpr bool is_std_vector_v = is_std_vector<T>::value;
+
+    // std::deque
+    template <typename T>
+    struct is_std_deque : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_deque <std::deque<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_deque_v = is_std_deque<T>::value;
+
+    // std::list
+    template <typename T>
+    struct is_std_list : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_list <std::list<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_list_v = is_std_list<T>::value;
+
+    // std::forward_list
+    template <typename T>
+    struct is_std_forward_list : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_forward_list <std::forward_list<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_forward_list_v = is_std_forward_list<T>::value;
+
+    // std::map
+    template <typename T>
+    struct is_std_map : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_map <std::map<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_map_v = is_std_map<T>::value;
+
+    // std::unordered_map
+    template <typename T>
+    struct is_std_unordered_map : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_unordered_map <std::unordered_map<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_unordered_map_v = is_std_unordered_map<T>::value;
+
+    // std::set
+    template <typename T>
+    struct is_std_set : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_set <std::set<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_set_v = is_std_set<T>::value;
+
+    // std::unordered_set
+    template <typename T>
+    struct is_std_unordered_set : std::false_type {};
+
+    template <typename... ArgsT>
+    struct is_std_unordered_set <std::unordered_set<ArgsT...>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_unordered_set_v = is_std_unordered_set<T>::value;
+
+    // std::span
+    template <typename T>
+    struct is_std_span : std::false_type {};
+
+    template <typename T, std::size_t N>
+    struct is_std_span <std::span<T, N>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_span_v = is_std_span<T>::value;
 }
