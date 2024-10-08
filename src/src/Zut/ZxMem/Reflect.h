@@ -38,7 +38,13 @@ namespace ZQF::Zut::ZxMemPrivate
         template<auto>
         static consteval auto GetFieldSigNameImp() -> const char*
         {
+#if __cpp_lib_source_location >= 201907L
             return std::source_location::current().function_name();
+#elif defined(_MSC_VER)
+            return __FUNCSIG__;
+#else
+            return __PRETTY_FUNCTION__;
+#endif
         }
 
         template<typename Object_Type, std::size_t IDX>
@@ -153,9 +159,15 @@ namespace ZQF::Zut::ZxMemPrivate
         static consteval auto GetFieldName() -> std::string_view
         {
             constexpr std::string_view symbol_name{ ZxReflex::GetFieldSigName<Object_Type, IDX>() };
+#if defined(__clang__)
+#elif defined(__GNUC__)
+#elif defined(_MSC_VER)
             constexpr auto field_name_beg{ symbol_name.find("&value->") + 8 };
             constexpr auto field_name_end{ symbol_name.find(">", field_name_beg) };
             constexpr auto filed_name_size{ field_name_end - field_name_beg };
+#else
+            static_assert(false, "ZxReflect::GetFieldName(): unknown compiler.");
+#endif
             return symbol_name.substr(field_name_beg, filed_name_size);
         }
 
