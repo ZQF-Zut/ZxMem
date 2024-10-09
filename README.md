@@ -212,7 +212,7 @@ auto main(void) -> int
 ```
 
 ## Installation
-cmake
+**CMake**
 ```cmake
 cmake_minimum_required (VERSION 3.25)
 
