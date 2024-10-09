@@ -1,7 +1,7 @@
 # ZxMem
 MemoryStream
 
-# Example
+## Example
 **basic io operation**
 ```cpp
 #include <print>
@@ -211,7 +211,7 @@ auto main(void) -> int
 }
 ```
 
-# Installation
+## Installation
 cmake
 ```cmake
 cmake_minimum_required (VERSION 3.25)
