@@ -1,4 +1,4 @@
-project(Zut_ZxMem_Reflect_Test)
+project(Zut_ZxMem_Reflex_Test)
 
 # Test Project
 add_executable("${PROJECT_NAME}" "main.cpp")
