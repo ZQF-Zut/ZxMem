@@ -2,7 +2,7 @@
 MemoryStream
 
 # Example
-basic io operation
+**basic io operation**
 ```cpp
 #include <print>
 #include <iostream>
@@ -85,7 +85,7 @@ auto main(void) -> int
 }
 ```
 
-reflex
+**reflex serialization, deserialization of binary data**
 ```cpp
 #include <print>
 #include <iostream>
