@@ -18,7 +18,7 @@ namespace ZQF::Zut::ZxMemReflex
         template <typename Object_Type>
         struct StaticWarp
         {
-            inline static Object_Type value;
+            inline static std::decay_t<Object_Type> value;
         };
 
         template <typename T>
@@ -171,20 +171,11 @@ namespace ZQF::Zut::ZxMemReflex
         }
 
         template<typename Object_Type>
-        static constexpr auto FotEach(Object_Type& Object, auto&& Functor) -> void
+        static constexpr auto FotEachField(Object_Type&& Object, auto&& Functor) -> void
         {
-            auto tuple{ ZxReflex::GetTuple(std::forward<Object_Type>(Object)) };
-            [&tuple, &Functor] <auto... Ns>(std::index_sequence<Ns...>) {
-                (Functor(ZxReflex::GetFieldName<Object_Type, Ns>(), Ns, *std::get<Ns>(tuple)), ...);
-            }
-            (std::make_index_sequence<ZxReflex::GetFieldCount<Object_Type>()>{});
-        }
-
-        template<typename Object_Type>
-        static constexpr auto FotEachField(Object_Type& Object, auto&& Functor) -> void
-        {
-            auto tuple{ ZxReflex::GetTuple(std::forward<Object_Type>(Object)) };
-            [&tuple, &Functor] <auto... Ns>(std::index_sequence<Ns...>) {
+            auto tuple{ ZxReflex::GetTuple(Object) };
+            [&Functor, &tuple] <auto... Ns>(std::index_sequence<Ns...>)
+            {
                 (Functor(*std::get<Ns>(tuple)), ...);
             }
             (std::make_index_sequence<ZxReflex::GetFieldCount<Object_Type>()>{});

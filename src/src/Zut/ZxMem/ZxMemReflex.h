@@ -1,6 +1,6 @@
 #pragma once
-#include <Zut/ZxMem/Reflex/ZxReflex.h>
-#include <Zut/ZxMem/Reflex/BinaryField.h>
+#include <Zut/ZxMem/Reflex/Reflex.h>
+#include <Zut/ZxMem/Reflex/Field.h>
 
 
 namespace ZQF::Zut::ZxMemReflex::Private
@@ -11,7 +11,7 @@ namespace ZQF::Zut::ZxMemReflex::Private
         ZQF::Zut::ZxMemReflex::ZxReflex::FotEachField
         (
             object,
-            [&bytes](auto&& v)
+            [&bytes](auto& v)
             {
                 bytes += ZQF::Zut::ZxMemReflex::BinaryField::SizeBytes(v);
             }
@@ -24,7 +24,7 @@ namespace ZQF::Zut::ZxMemReflex::Private
         ZQF::Zut::ZxMemReflex::ZxReflex::FotEachField
         (
             object,
-            [&mem](auto&& v)
+            [&mem](auto& v)
             {
                 ZQF::Zut::ZxMemReflex::BinaryField::Write(mem, v);
             }
@@ -36,7 +36,7 @@ namespace ZQF::Zut::ZxMemReflex::Private
         ZQF::Zut::ZxMemReflex::ZxReflex::FotEachField
         (
             object,
-            [&mem](auto&& v)
+            [&mem](auto& v)
             {
                 ZQF::Zut::ZxMemReflex::BinaryField::Read(mem, v);
             }
