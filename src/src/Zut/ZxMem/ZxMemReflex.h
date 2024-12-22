@@ -84,6 +84,7 @@ namespace ZQF::Zut::ZxMemReflex
 #define ZXMEM_REFLEX(...)                                                                                                                                                                                     \
 auto ReflexBinaryStore() const -> ZxMem { ZxMem mem{ this->ReflexSizeBytes() }; this->ReflexBinaryStore(mem); return mem; }                                                                                   \
 auto ReflexBinaryStore(ZxMem& mem) const -> void { this->_ReflexBinaryStore(mem, __VA_ARGS__); }                                                                                                              \
+auto ReflexBinaryStore(const std::string_view msPath) const -> void { this->ReflexBinaryStore().Save(msPath); }                                                                                               \
 auto ReflexBinaryLoad(const std::string_view msPath) -> void { ZxMem mem{ msPath }; this->_ReflexBinaryLoad(mem, __VA_ARGS__); }                                                                              \
 auto ReflexBinaryLoad(ZxMem& mem) -> void { this->_ReflexBinaryLoad(mem, __VA_ARGS__); }                                                                                                                      \
 constexpr auto ReflexSizeBytes() const -> std::size_t { return this->_SizeBytes(__VA_ARGS__); }                                                                                                               \
