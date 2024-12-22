@@ -178,7 +178,7 @@ auto main(void) -> int
                 .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}},
                 .k = {123,"666",{321, "999"}}
             };
-            fool1_store.ReflexBinaryStore().Save("foo1.bin");
+            fool1_store.ReflexBinaryStore("foo1.bin");
 
             foo1 foo1_load;
             foo1_load.ReflexBinaryLoad("foo1.bin");
@@ -199,7 +199,7 @@ auto main(void) -> int
                 .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}},
                 .k = {123,"666",{321, "999"}}
             };
-            fool2_store.ReflexBinaryStore().Save("foo2.bin");
+            fool2_store.ReflexBinaryStore("foo2.bin");
 
             foo2 foo2_load;
             foo2_load.ReflexBinaryLoad("foo2.bin");
@@ -220,7 +220,7 @@ auto main(void) -> int
                 .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}},
                 .k = {123,"666",{321, "999"}}
             };
-            ZxMemReflex::BinaryStore(fool3_store).Save("3.bin");
+            ZxMemReflex::BinaryStore(fool3_store, "3.bin");
 
             foo3 foo3_load;
             ZxMemReflex::BinaryLoad(foo3_load, "3.bin");
