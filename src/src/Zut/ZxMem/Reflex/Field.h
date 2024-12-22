@@ -43,6 +43,10 @@ namespace ZQF::Zut::ZxMemReflex
                     }
                 }
             }
+            else if constexpr (ZQF::Zut::ZxMemTraits::is_zxmem_reflex_able<field_type_t>)
+            {
+                ZxMemReflex::BinaryStore(field, writer);
+            }
             else
             {
                 static_assert(false, "ZQF::Zut::ZxMemPrivate::Reflect::_FieldWrite(): error type!");
@@ -103,6 +107,10 @@ namespace ZQF::Zut::ZxMemReflex
                     }
                 }
             }
+            else if constexpr (ZQF::Zut::ZxMemTraits::is_zxmem_reflex_able<field_type_t>)
+            {
+                ZQF::Zut::ZxMemReflex::BinaryLoad(field, reader);
+            }
             else
             {
                 static_assert(false, "ZQF::Zut::ZxMemPrivate::Reflect::_FieldRead(): error type!");
@@ -149,6 +157,10 @@ namespace ZQF::Zut::ZxMemReflex
                     }
                 }
                 return bytes;
+            }
+            else if constexpr (ZQF::Zut::ZxMemTraits::is_zxmem_reflex_able<field_type_t>)
+            {
+                return ZQF::Zut::ZxMemReflex::SizeBytes(field);
             }
             else
             {

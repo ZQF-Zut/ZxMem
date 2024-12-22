@@ -4,6 +4,19 @@
 #include <Zut/ZxMem.h>
 
 
+struct foo0
+{
+    struct foox
+    {
+        std::size_t n{};
+        std::string x;
+    };
+
+    std::size_t n{};
+    std::string x;
+    foox m;
+};
+
 struct foo1
 {
 public:
@@ -17,6 +30,7 @@ public:
     std::set<int> h;
     std::map<std::string, std::size_t> i;
     std::unordered_map<std::string, std::pair<std::size_t, std::size_t>> j;
+    foo0 k;
 
 public:
     ZXMEM_REFLEX_ALL
@@ -35,9 +49,10 @@ public:
     std::set<int> h;
     std::map<std::string, std::size_t> i;
     std::unordered_map<std::string, std::pair<std::size_t, std::size_t>> j;
+    foo0 k;
 
 public:
-    ZXMEM_REFLEX(a,b,c,d,e,f,g,h,i,j)
+    ZXMEM_REFLEX(a,b,c,d,e,f,g,h,i,j,k)
 };
 
 struct foo3
@@ -53,6 +68,7 @@ public:
     std::set<int> h;
     std::map<std::string, std::size_t> i;
     std::unordered_map<std::string, std::pair<std::size_t,std::size_t>> j;
+    foo0 k;
 };
 
 auto main(void) -> int
@@ -71,7 +87,8 @@ auto main(void) -> int
                 .g = {"123","321","666","777","888"},
                 .h = {0xAA,0xBB,0xCC,0xEE,0xFF},
                 .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}},
-                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}}
+                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}},
+                .k = {123,"666",{321, "999"}}
             };
             fool1_store.ReflexBinaryStore().Save("foo1.bin");
 
@@ -91,7 +108,8 @@ auto main(void) -> int
                 .g = {"123","321","666","777","888"},
                 .h = {0xAA,0xBB,0xCC,0xEE,0xFF},
                 .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}},
-                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}}
+                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}},
+                .k = {123,"666",{321, "999"}}
             };
             fool2_store.ReflexBinaryStore().Save("foo2.bin");
 
@@ -111,7 +129,8 @@ auto main(void) -> int
                 .g = {"123","321","666","777","888"},
                 .h = {0xAA,0xBB,0xCC,0xEE,0xFF},
                 .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}},
-                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}}
+                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}},
+                .k = {123,"666",{321, "999"}}
                 
             };
             ZxMemReflex::BinaryStore(fool3_store).Save("3.bin");

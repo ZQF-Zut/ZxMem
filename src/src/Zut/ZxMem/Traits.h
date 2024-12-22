@@ -10,10 +10,24 @@
 #include <unordered_map>
 
 
+namespace ZQF::Zut
+{
+    class ZxMem;
+}
+
+namespace ZQF::Zut::ZxMemReflex
+{
+    static constexpr auto SizeBytes(const auto& object) -> std::size_t;
+    static auto BinaryStore(const auto& object, ZQF::Zut::ZxMem& mem) -> void;
+    static auto BinaryStore(const auto& object) -> ZQF::Zut::ZxMem;
+    static auto BinaryLoad(auto& object, const std::string_view msPath) -> void;
+    static auto BinaryLoad(auto& object, ZQF::Zut::ZxMem& mem) -> void;
+}
+
 namespace ZQF::Zut::ZxMemTraits
 {
     template <typename T>
-    concept is_iter_able = requires(T & t)
+    concept is_iter_able = requires(T& t)
     {
         *std::begin(t);
         std::begin(t) != std::end(t);
@@ -21,16 +35,23 @@ namespace ZQF::Zut::ZxMemTraits
     };
 
     template <typename T>
-    concept is_span_able = requires(T & t)
+    concept is_span_able = requires(T& t)
     {
         std::span{ t };
     };
 
     template <typename T>
-    concept is_sequence_container = requires(T & t)
+    concept is_sequence_container = requires(T& t)
     {
         t.data();
         t.size();
+    };
+
+    template <typename T>
+    concept is_zxmem_reflex_able = requires(T& t)
+    {
+        ZQF::Zut::ZxMemReflex::BinaryStore(t);
+        ZQF::Zut::ZxMemReflex::BinaryLoad(t, "");
     };
 
 
