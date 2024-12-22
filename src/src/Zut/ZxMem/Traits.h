@@ -18,10 +18,11 @@ namespace ZQF::Zut
 namespace ZQF::Zut::ZxMemReflex
 {
     static constexpr auto SizeBytes(const auto& object) -> std::size_t;
-    static auto BinaryStore(const auto& object, ZQF::Zut::ZxMem& mem) -> void;
     static auto BinaryStore(const auto& object) -> ZQF::Zut::ZxMem;
-    static auto BinaryLoad(auto& object, const std::string_view msPath) -> void;
+    static auto BinaryStore(const auto& object, ZxMem& rfMem) -> void;
+    static auto BinaryStore(const auto& object, const std::string_view msPath) -> void;
     static auto BinaryLoad(auto& object, ZQF::Zut::ZxMem& mem) -> void;
+    static auto BinaryLoad(auto& object, const std::string_view msPath) -> void;
 }
 
 namespace ZQF::Zut::ZxMemTraits

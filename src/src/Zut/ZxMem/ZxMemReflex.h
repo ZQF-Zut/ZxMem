@@ -51,26 +51,31 @@ namespace ZQF::Zut::ZxMemReflex
         return Private::SizeBytesImp(object);
     }
 
-    static auto BinaryStore(const auto& object, ZxMem& mem) -> void
-    {
-        Private::BinaryStoreImp(object, mem);
-    }
-
     static auto BinaryStore(const auto& object) -> ZxMem
     {
         ZxMem mem{ ZxMemReflex::SizeBytes(object) };
-        ZxMemReflex::BinaryStore(object, mem);
+        Private::BinaryStoreImp(object, mem);
         return mem;
+    }
+
+    static auto BinaryStore(const auto& object, ZxMem& rfMem) -> void
+    {
+        Private::BinaryStoreImp(object, rfMem);
+    }
+
+    static auto BinaryLoad(auto& object, ZxMem& mem) -> void
+    {
+        Private::BinaryLoadImp(object, mem);
+    }
+
+    static auto BinaryStore(const auto& object, const std::string_view msPath) -> void
+    {
+        ZxMemReflex::BinaryStore(object).Save(msPath);
     }
 
     static auto BinaryLoad(auto& object, const std::string_view msPath) -> void
     {
         ZxMem mem{ msPath };
-        Private::BinaryLoadImp(object, mem);
-    }
-
-    static auto BinaryLoad(auto& object, ZxMem& mem) -> void
-    {
         Private::BinaryLoadImp(object, mem);
     }
 }
@@ -90,9 +95,9 @@ template<typename ...Arg> auto _ReflexBinaryLoad(ZxMem& mem, Arg&... args) -> vo
 
 
 #define ZXMEM_REFLEX_ALL                                                                                                             \
-auto ReflexBinaryStore() const -> ZxMem { ZxMem mem{ this->ReflexSizeBytes() }; this->ReflexBinaryStore(mem); return mem; }          \
-auto ReflexBinaryStore(ZxMem& mem) const -> void { ZQF::Zut::ZxMemReflex::BinaryStore(*this, mem); }                                 \
-auto ReflexBinaryLoad(const std::string_view msPath) -> void { ZxMem mem{ msPath }; ZQF::Zut::ZxMemReflex::BinaryLoad(*this, mem); } \
+auto ReflexBinaryStore() const -> ZxMem { return ZQF::Zut::ZxMemReflex::BinaryStore(*this); }                                        \
+auto ReflexBinaryStore(const std::string_view msPath) const -> void { ZQF::Zut::ZxMemReflex::BinaryStore(*this, msPath); }           \
+auto ReflexBinaryLoad(const std::string_view msPath) -> void { ZQF::Zut::ZxMemReflex::BinaryLoad(*this, msPath); }                   \
 auto ReflexBinaryLoad(ZxMem& mem) -> void { ZQF::Zut::ZxMemReflex::BinaryLoad(*this, mem); }                                         \
 constexpr auto ReflexSizeBytes() const -> std::size_t { return ZQF::Zut::ZxMemReflex::SizeBytes(*this); }                            \
 
