@@ -147,4 +147,14 @@ namespace ZQF::Zut::ZxMemTraits
 
     template <typename T>
     constexpr bool is_std_span_v = is_std_span<T>::value;
+
+    // std::pair
+    template <typename T>
+    struct is_std_pair : std::false_type {};
+
+    template <typename T, typename U>
+    struct is_std_pair <std::pair<T, U>> : std::true_type {};
+
+    template <typename T>
+    constexpr bool is_std_pair_v = is_std_pair<T>::value;
 }

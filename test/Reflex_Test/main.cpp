@@ -16,6 +16,7 @@ public:
     std::list<std::string> g;
     std::set<int> h;
     std::map<std::string, std::size_t> i;
+    std::unordered_map<std::string, std::pair<std::size_t, std::size_t>> j;
 
 public:
     ZXMEM_REFLEX_ALL
@@ -33,9 +34,10 @@ public:
     std::list<std::string> g;
     std::set<int> h;
     std::map<std::string, std::size_t> i;
+    std::unordered_map<std::string, std::pair<std::size_t, std::size_t>> j;
 
 public:
-    ZXMEM_REFLEX(a,b,c,d,e,f,g,h,i)
+    ZXMEM_REFLEX(a,b,c,d,e,f,g,h,i,j)
 };
 
 struct foo3
@@ -50,6 +52,7 @@ public:
     std::list<std::string> g;
     std::set<int> h;
     std::map<std::string, std::size_t> i;
+    std::unordered_map<std::string, std::pair<std::size_t,std::size_t>> j;
 };
 
 auto main(void) -> int
@@ -67,7 +70,8 @@ auto main(void) -> int
                 .f = {1,2,3,4,5,6,7},
                 .g = {"123","321","666","777","888"},
                 .h = {0xAA,0xBB,0xCC,0xEE,0xFF},
-                .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}}
+                .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}},
+                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}}
             };
             fool1_store.ReflexBinaryStore().Save("foo1.bin");
 
@@ -86,7 +90,8 @@ auto main(void) -> int
                 .f = {1,2,3,4,5,6,7},
                 .g = {"123","321","666","777","888"},
                 .h = {0xAA,0xBB,0xCC,0xEE,0xFF},
-                .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}}
+                .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}},
+                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}}
             };
             fool2_store.ReflexBinaryStore().Save("foo2.bin");
 
@@ -105,7 +110,9 @@ auto main(void) -> int
                 .f = {1,2,3,4,5,6,7},
                 .g = {"123","321","666","777","888"},
                 .h = {0xAA,0xBB,0xCC,0xEE,0xFF},
-                .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}}
+                .i = {{"1008611",0x01008611},{"AAVV", 0xAABB},{"shfuis",0x22}},
+                .j = {{"1008611",std::pair{0x01008611, 0x1}},{"AAVV", std::pair{0xAABB,0x1}},{"shfuis",std::pair{0x22,0x1}}}
+                
             };
             ZxMemReflex::BinaryStore(fool3_store).Save("3.bin");
 
