@@ -69,7 +69,7 @@ namespace ZQF::Zut::ZxMemReflex
             }
             else if constexpr (ZQF::Zut::ZxMemTraits::is_iter_able<field_type_t>)
             {
-                const auto ele_cnt{ reader.Get<std::uint32_t>() };
+                const auto ele_cnt{ reader.template Get<std::uint32_t>() };
 
                 if constexpr (ZQF::Zut::ZxMemTraits::is_span_able<field_type_t>)
                 {

@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include <map>
+#include <list>
 #include <span>
 #include <deque>
 #include <array>

@@ -159,15 +159,17 @@ namespace ZQF::Zut::ZxMemReflex
         {
             constexpr std::string_view symbol_name{ ZxReflex::GetFieldSigName<Object_Type, IDX>() };
 #if defined(__clang__)
+            return {};
 #elif defined(__GNUC__)
+            return {};
 #elif defined(_MSC_VER)
             constexpr auto field_name_beg{ symbol_name.find("&value->") + 8 };
             constexpr auto field_name_end{ symbol_name.find(">", field_name_beg) };
             constexpr auto filed_name_size{ field_name_end - field_name_beg };
+            return symbol_name.substr(field_name_beg, filed_name_size);
 #else
             static_assert(false, "ZxReflect::GetFieldName(): unknown compiler.");
 #endif
-            return symbol_name.substr(field_name_beg, filed_name_size);
         }
 
         template<typename Object_Type>

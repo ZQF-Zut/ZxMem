@@ -1,5 +1,7 @@
 #include <cmath>
 #include <print>
+#include <list>
+#include <vector>
 #include <iostream>
 #include <Zut/ZxMem.h>
 
